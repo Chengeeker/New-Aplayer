@@ -1,7 +1,7 @@
 {
   "name": "hexo-tag-aplayer",
   "version": "3.1.0",
-  "description": "A maintained, liquid-glass APlayer/MetingJS tag plugin for Hexo",
+  "description": "A maintained frosted-glass APlayer/MetingJS tag plugin for Hexo with draggable docking and mobile enhancements",
   "main": "index.js",
   "scripts": {
     "build": "node scripts/build.js",

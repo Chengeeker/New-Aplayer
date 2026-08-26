@@ -1,4 +1,4 @@
-# New-Aplayer (iOS Liquid Glass Edition)
+# New-Aplayer (毛玻璃与贴边拖拽增强版)
 
 <div align="center">
 
@@ -7,7 +7,7 @@
 [![MetingJS](https://img.shields.io/badge/MetingJS-1.2.0-green.svg)](https://github.com/metowolf/MetingJS)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**专为 Hexo 博客深度定制的 iOS Liquid Glass 拟物毛玻璃音乐播放器插件**
+**为 Hexo 博客定制的毛玻璃拟态、贴边吸附与悬浮歌词 APlayer / Meting 音乐播放器插件**
 
 [English Documentation](./README_EN.md) · [中文文档](./README.md)
 
@@ -32,28 +32,30 @@
 
 ## ✨ 功能特性
 
-1. **iOS Liquid Glass 流体毛玻璃质感**：
-   - 采用高规格多层模糊渲染（`backdrop-filter: blur(28px) saturate(190%)`）。
-   - 结合高光镜面边框微光（`inset 0 1px 1px rgba(255,255,255,0.9)`）与深层流体弥散阴影，完美适配浅色与深色（Dark Mode）自适应主题。
+1. **毛玻璃拟态风格（Frosted Glass）**：
+   - 采用多层高斯模糊与半透明自适应背景，搭配细腻微光边框与柔和阴影，与博客浅色/深色（Dark Mode）自然融合。
 2. **全局悬浮歌词胶囊 HUD**：
-   - 脱离播放器狭窄底栏，独立置于屏幕中央上方呈胶囊状展示，支持单句高光、双语歌词与优雅淡入淡出。
-   - 歌词 HUD 支持全屏幕鼠标/触控 **2D 自由拖拽**。
-3. **全自由拖拽 + 屏幕边缘吸附 Mini-Orb**：
-   - **自由 2D 拖拽**：按住播放器空白处可在屏幕任意位置随意拖拽放置，视口边界自动保护。
-   - **贴边半球吸附**：靠近屏幕左/右边缘（< 70px）或点击专属贴边按钮 `|←` 时，自动折叠为 iOS 拟物半球 Mini-Orb，露出 360° 匀速旋转黑胶唱片盘与播放微光。
-   - **边缘沿轴滑动**：吸附状态下可沿屏幕边缘上下自由滑动停驻；向屏幕内侧拉拽即可顺滑展开。
-   - **状态持久化恢复**：基于 `localStorage` 自动记录吸附与停靠位置，页面初次加载、跳转（PJAX）与刷新后自动精准恢复。
-4. **移动端深度响应式适配**：
-   - 播放器底栏高度优化为紧凑 56px，默认自动折叠歌单（`list_folded: true`），彻底杜绝遮挡移动端内容。
+   - 歌词脱离播放器狭窄底栏，独立置于屏幕中央上方呈胶囊状展示，支持单句高光与双语歌词。
+   - 歌词胶囊支持全屏幕鼠标/触屏 **2D 自由拖拽**。
+3. **全自由 2D 拖拽 + 精准贴边吸附**：
+   - **自由 2D 拖拽**：按住播放器可在屏幕任意位置随意拖拽停放，视口边界自动保护。
+   - **严格贴边吸附（8px）**：仅在播放器被完全推到紧贴屏幕边缘（<= 8px）或点击专属贴边按钮 `|←` 时，才折叠为半球 Mini-Orb，彻底杜绝远距离误吸附。
+   - **边缘沿轴滑动**：吸附状态下可沿屏幕边缘上下滑动调节位置；向屏幕内侧拖拽即可顺滑展开。
+   - **状态持久化记忆**：基于 `localStorage` 自动记录坐标与吸附状态，刷新页面与 PJAX 切页后自动精准恢复。
+4. **毫秒级本地缓存加载（Meting Fast-Cache）**：
+   - 自动在本地缓存歌单元数据，刷新页面或切页时实现 0 秒毫秒级瞬间渲染，杜绝长时间空白等待。
+5. **移动端深度响应式适配**：
+   - 播放器底栏高度优化为紧凑 56px，默认自动折叠歌单（`list_folded: true`），避免遮挡移动端阅读区域。
    - 消除歌词基线裁切，在小屏手机上垂直精准居中。
-5. **MetingJS API 代理路由智能修复**：
-   - 原生修复 MetingJS 在自建 API 解析时因缺失 `:server/:type/:id` 占位符导致 404 与歌曲跳过错误（“An audio error has occurred”）。
+6. **Meting API 路由修复与标签语法增强**：
+   - 自动补全 API 参数占位符（`:server/:type/:id`），避免 404 与歌曲跳过报错（“An audio error has occurred”）。
+   - 标签解析全面兼容 `autoplay:false`、`listfolded:true`、`fixed:true` 等键值与布尔写法。
 
 ---
 
 ## 🚀 快速开始与安装
 
-本项目采用标准的 Hexo 本地源码模块集成方案，预编译好的 CommonJS 文件已直接包含在仓库中，开箱即用：
+本项目采用标准的 Hexo 本地源码模块集成方案，预编译好的 CommonJS 运行文件已直接包含在仓库中，开箱即用：
 
 ### 第一步：克隆源码至博客的 `source` 目录
 
@@ -109,7 +111,7 @@ aplayer:
 ```
 
 > ⚠️ **关于 Meting API 的说明**：
-> `https://api.injahow.cn/meting/` 仅为公共演示接口，公共接口可能会受到网络波动或服务变动影响。对于长期稳定使用的博客，**强烈建议自行部署 Meting-API 服务**（基于 Vercel、Docker 或自建服务器），并将地址填入 `meting_api`。
+> `https://api.injahow.cn/meting/` 仅为公共演示接口，公共接口可能会受到网络波动或服务变动影响。对于长期稳定使用的博客，**建议自行部署 Meting-API 服务**（基于 Vercel、Docker 或自建服务器），并将地址填入 `meting_api`。
 
 ---
 
@@ -138,8 +140,8 @@ aplayer:
 ```text
 New-Aplayer/
 ├── assets/                       # 核心静态资源库（前端直引资源）
-│   ├── APlayer.glass.css         # ★ iOS Liquid Glass 核心样式表（外观定制）
-│   └── APlayer.dock.js           # ★ 拖拽与贴边吸附引擎（交互定制）
+│   ├── APlayer.glass.css         # ★ 毛玻璃样式表（外观定制）
+│   └── APlayer.dock.js           # ★ 拖拽、贴边吸附与缓存引擎（交互定制）
 ├── common/                       # 公共常量与工具函数
 │   ├── constant.es               # 常量定义与资源标记 Marker
 │   └── util.es                   # 选项提取、安全转义与工具函数
@@ -166,9 +168,9 @@ New-Aplayer/
 ### 核心代码模块职责
 
 1. **`assets/APlayer.glass.css`**：
-   - 负责播放器底栏、吸附半球 Mini-Orb、悬浮歌词胶囊 HUD、播放列表卡片的 iOS 毛玻璃拟物风格、阴影、微光边框及媒体查询。
+   - 负责播放器底栏、吸附半球 Mini-Orb、悬浮歌词胶囊 HUD、播放列表卡片的毛玻璃半透明风格、微光边框及媒体查询。
 2. **`assets/APlayer.dock.js`**：
-   - 负责 PC 鼠标与手机触屏手势捕获、2D 自由拖拽、屏幕边缘吸附计算、Y 轴沿边缘滑动、点击展开/暂停事件调度与 `localStorage` 持久化恢复。
+   - 负责鼠标与触摸手势捕获、2D 自由拖拽、8px 边缘吸附判定、边缘滑动、Meting 本地缓存加速与 `localStorage` 状态持久化。
 3. **`lib/config.es`**：
    - 负责读取站点 `_config.yml` 中的 `aplayer` 配置项，向 Hexo 注册静态资产生成管道（使得 `assets/` 下的 CSS/JS 自动生成到博客的 `public/assets/` 目录中）。
 4. **`index.es`**：
@@ -184,10 +186,10 @@ New-Aplayer/
 | :--- | :--- | :--- |
 | **修改毛玻璃颜色/模糊度/透明度** | `assets/APlayer.glass.css` | 修改 `:root` 变量 `--aplayer-glass-bg`、`--aplayer-glass-blur`、`--aplayer-glass-border` 等。 |
 | **修改贴边半球的尺寸/圆角** | `assets/APlayer.glass.css` | 搜索 `.aplayer-docked-left` 与 `.aplayer-docked-right`，修改 `width: 50px`、`border-radius: 0 28px 28px 0`。 |
-| **调整吸附灵敏度阈值** | `assets/APlayer.dock.js` | 搜索 `snapThreshold = Math.min(70, vw * 0.18)`，增大或减小触发贴边的像素距离。 |
+| **调整吸附灵敏度阈值** | `assets/APlayer.dock.js` | 搜索 `snapThreshold = 8`，调整触发贴边的像素距离。 |
 | **修改贴边按钮图标** | `assets/APlayer.dock.js` | 搜索 `injectDockButton()` 函数，替换内部的 `btn.innerHTML` SVG 矢量图形。 |
 | **修改默认是否折叠歌单** | `index.es` & `_config.yml` | 在 `index.es` 中修改 `data-listfolded` 默认值，或在 `_config.yml` 中设置 `list_folded: true`。 |
-| **新增自定义 Meting API 节点** | `lib/tag/playerMeting.es` | 搜索 `formatMetingApi`，调整拼接的查询参数规则。 |
+| **调整 Meting 缓存过期时间** | `assets/APlayer.dock.js` | 搜索 `CACHE_EXPIRY_MS`（默认为 24 小时）。 |
 
 ---
 

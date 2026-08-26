@@ -1,4 +1,4 @@
-# New-Aplayer (iOS Liquid Glass Edition)
+# New-Aplayer (Frosted Glass & Docking Edition)
 
 <div align="center">
 
@@ -7,7 +7,7 @@
 [![MetingJS](https://img.shields.io/badge/MetingJS-1.2.0-green.svg)](https://github.com/metowolf/MetingJS)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**An iOS Liquid Glass Music Player Plugin for Hexo Blogs with Draggable Edge Snapping**
+**A Frosted-Glass APlayer / Meting Plugin for Hexo with Draggable Edge Snapping & Lyrics HUD**
 
 [English Documentation](./README_EN.md) · [中文文档](./README.md)
 
@@ -32,22 +32,24 @@
 
 ## ✨ Key Features
 
-1. **iOS Liquid Glass Aesthetics**:
-   - Advanced multi-layer frosted glass rendering (`backdrop-filter: blur(28px) saturate(190%)`).
-   - Specular border reflection highlight (`inset 0 1px 1px rgba(255,255,255,0.9)`) and fluid ambient shadows, seamlessly adapting to both Light and Dark modes.
+1. **Frosted Glass Aesthetics**:
+   - Multi-layer Gaussian blur with semi-transparent adaptive backgrounds, subtle highlight borders, and soft fluid shadows that blend smoothly with both Light and Dark themes.
 2. **Screen-Centered Floating Lyrics Capsule HUD**:
-   - Detached from the cramped bottom bar and rendered as a floating frosted pill at screen center with highlighted typography and smooth fade transitions.
+   - Detached from the cramped bottom bar and rendered as a floating frosted pill at screen center with highlighted typography.
    - Fully supports **free 2D mouse and touch dragging** anywhere across the screen.
-3. **Free 2D Dragging & Edge Snapping Mini-Orb**:
-   - **Free 2D Dragging**: Drag the player card anywhere freely with automatic viewport boundary clamping.
-   - **Hemisphere Mini-Orb Docking**: Drag near the left/right screen edge (< 70px) or click the dedicated dock button `|←` to collapse into an iOS semi-circular Mini-Orb with a 360° continuously rotating vinyl album disc.
+3. **Free 2D Dragging & Strict Edge Snapping (8px)**:
+   - **Free 2D Dragging**: Drag the player card anywhere freely with automatic viewport boundary protection.
+   - **Strict Edge Snapping (8px)**: Only collapses into the semi-circular Mini-Orb when physically pushed flush against the screen edge (<= 8px) or clicking the dedicated dock button `|←`, preventing accidental premature snapping from a distance.
    - **Edge Vertical Sliding**: Slide the docked Mini-Orb up and down freely along the edge; pull inward toward screen center to smoothly expand.
-   - **State Persistence & Restoration**: Saves dock position and coordinates in `localStorage`, automatically restoring the exact position upon page load, refresh, and PJAX transitions.
-4. **Mobile Responsive Optimization**:
+   - **State Persistence & Restoration**: Saves dock coordinates and state in `localStorage`, automatically restoring position upon initial load, refresh, and PJAX transitions.
+4. **Millisecond-Level Local Caching (Meting Fast-Cache)**:
+   - Automatically caches playlist metadata in `localStorage`, eliminating network latency and rendering the player instantly in 0 milliseconds upon page refreshes and navigation.
+5. **Mobile Responsive Optimization**:
    - Bottom bar compacted to 56px height, with playlist folded by default (`list_folded: true`) to prevent covering mobile reading space.
    - Zero lyrics clipping with precise vertical centering on smartphone screens.
-5. **MetingJS API Proxy Route Fix**:
+6. **Meting API Proxy Route Fix & Tag Syntax Enhancements**:
    - Automatically handles query parameter template injection (`?server=:server&type=:type&id=:id&r=:r`), eliminating 404s and playback skipping issues ("An audio error has occurred").
+   - Full tag parser compatibility with `autoplay:false`, `listfolded:true`, `fixed:true`, etc.
 
 ---
 
@@ -94,7 +96,7 @@ Add the following configuration to your Hexo root `_config.yml`:
 aplayer:
   meting: true                                  # Enable MetingJS for NetEase/QQ/Kugou music
   meting_api: https://api.injahow.cn/meting/    # Meting API URL (public demo endpoint)
-  asset_inject: true                            # Auto inject liquid glass assets into pages
+  asset_inject: true                            # Auto inject frosted glass assets into pages
   global:
     enable: true                                # Enable global fixed bottom player
     id: 13104322073                             # Playlist / Song ID
@@ -109,7 +111,7 @@ aplayer:
 ```
 
 > ⚠️ **Note on Meting API**:
-> `https://api.injahow.cn/meting/` is provided as a public demo endpoint. Public endpoints may be subject to network latency or rate limits. For production and long-term stability, **it is strongly recommended to self-host a Meting-API instance** (via Docker, Vercel, or personal server) and configure its URL in `meting_api`.
+> `https://api.injahow.cn/meting/` is provided as a public demo endpoint. Public endpoints may be subject to network latency or rate limits. For production and long-term stability, **it is recommended to self-host a Meting-API instance** (via Docker, Vercel, or personal server) and configure its URL in `meting_api`.
 
 ---
 
@@ -136,8 +138,8 @@ This project is built on an ES6 + Babel + Hexo Generator architecture.
 ```text
 New-Aplayer/
 ├── assets/                       # Core frontend static assets
-│   ├── APlayer.glass.css         # ★ iOS Liquid Glass styling (visual customizations)
-│   └── APlayer.dock.js           # ★ Dragging & edge docking engine (interaction logic)
+│   ├── APlayer.glass.css         # ★ Frosted glass styling (visual customizations)
+│   └── APlayer.dock.js           # ★ Dragging, edge docking & caching engine (interaction logic)
 ├── common/                       # Shared constants and utility functions
 │   ├── constant.es               # Markers and constant definitions
 │   └── util.es                   # Option extractors, safe HTML escaping & helpers
@@ -164,9 +166,9 @@ New-Aplayer/
 ### Module Responsibilities
 
 1. **`assets/APlayer.glass.css`**:
-   - Manages frosted glass visual styling, specular reflection borders, Mini-Orb docked hemisphere layout, lyrics HUD capsule, and responsive media queries.
+   - Manages frosted glass visual styling, border highlights, Mini-Orb docked hemisphere layout, lyrics HUD capsule, and responsive media queries.
 2. **`assets/APlayer.dock.js`**:
-   - Handles standard Pointer Events for PC & mobile touch, 2D free dragging, edge snapping calculations, edge vertical sliding, undocking transitions, and `localStorage` persistence.
+   - Handles standard Pointer Events for PC & mobile touch, 2D free dragging, 8px strict edge snapping calculations, edge vertical sliding, Meting caching acceleration, and `localStorage` persistence.
 3. **`lib/config.es`**:
    - Parses site `_config.yml`, registers asset generation pipeline with Hexo so that files in `assets/` automatically deploy into `public/assets/`.
 4. **`index.es`**:
@@ -182,10 +184,10 @@ New-Aplayer/
 | :--- | :--- | :--- |
 | **Glass Color / Blur / Transparency** | `assets/APlayer.glass.css` | Edit `:root` variables: `--aplayer-glass-bg`, `--aplayer-glass-blur`, `--aplayer-glass-border`. |
 | **Mini-Orb Dimensions / Corner Radius** | `assets/APlayer.glass.css` | Find `.aplayer-docked-left` & `.aplayer-docked-right`, adjust `width: 50px` and `border-radius`. |
-| **Edge Snapping Threshold Distance** | `assets/APlayer.dock.js` | Find `snapThreshold = Math.min(70, vw * 0.18)` and adjust pixel trigger range. |
+| **Edge Snapping Threshold Distance** | `assets/APlayer.dock.js` | Find `snapThreshold = 8` and adjust pixel trigger range. |
 | **Custom Dock Icon** | `assets/APlayer.dock.js` | Find `injectDockButton()`, customize the SVG inner markup. |
 | **Default Playlist Fold / Unfold** | `index.es` & `_config.yml` | Set `list_folded: true` in `_config.yml` or change default check in `index.es`. |
-| **Custom Meting API Endpoint** | `lib/tag/playerMeting.es` | Find `formatMetingApi`, configure parameter templates. |
+| **Meting Cache Expiration Duration** | `assets/APlayer.dock.js` | Search `CACHE_EXPIRY_MS` (default is 24 hours). |
 
 ---
 

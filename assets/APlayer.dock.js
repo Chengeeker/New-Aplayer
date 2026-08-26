@@ -1,7 +1,7 @@
 /**
- * APlayer iOS Liquid Glass - Draggable & Edge Docking Engine
- * Supports pointer-based free 2D dragging, edge vertical dragging & snapping,
- * draggable lyrics HUD, and reliable play/pause interaction.
+ * APlayer Frosted Glass - Draggable & Edge Docking Engine
+ * Supports pointer-based free 2D dragging, 8px edge contact snapping,
+ * draggable lyrics HUD, Meting caching acceleration, and state persistence.
  */
 (function() {
   'use strict';
@@ -334,16 +334,17 @@
         var rect = player.getBoundingClientRect();
         var vw = window.innerWidth;
         var vh = window.innerHeight;
-        var snapThreshold = Math.min(70, vw * 0.18);
+        // Strict edge contact snapping: only snap if player is physically pushed against the edge (<= 8px)
+        var snapThreshold = 8;
 
         if (drag.wasDocked) {
           // Save new Y position on the edge
           dockPlayer(drag.dockSide, rect.top);
         } else {
-          // Snapping check for free float
-          if (rect.left < snapThreshold) {
+          // Snapping check for free float: only snap when truly flush with the edge
+          if (rect.left <= snapThreshold) {
             dockPlayer('left', rect.top);
-          } else if (rect.right > vw - snapThreshold) {
+          } else if (rect.right >= vw - snapThreshold) {
             dockPlayer('right', rect.top);
           } else {
             state.posX = rect.left;
@@ -434,18 +435,123 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPlayerDock);
-  } else {
+  // --- Meting Fast-Cache & Acceleration Engine ---
+  var METING_CACHE_PREFIX = 'meting_cache_';
+  var CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  function loadMetingFast() {
+    if (typeof window.APlayer === 'undefined') return;
+    var elements = document.querySelectorAll('.aplayer[data-id]');
+    if (!elements || !elements.length) return;
+
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i];
+      if (el._metingLoaded) continue;
+
+      var server = el.dataset.server || 'netease';
+      var type = el.dataset.type || 'playlist';
+      var id = el.dataset.id;
+      if (!id) continue;
+
+      var cacheKey = METING_CACHE_PREFIX + server + '_' + type + '_' + id;
+      var cached = null;
+      try {
+        var item = localStorage.getItem(cacheKey);
+        if (item) {
+          var parsed = JSON.parse(item);
+          if (parsed && parsed.data && (Date.now() - (parsed.time || 0) < CACHE_EXPIRY_MS)) {
+            cached = parsed.data;
+          }
+        }
+      } catch (e) {}
+
+      var defaultApi = 'https://api.injahow.cn/meting/?server=:server&type=:type&id=:id&r=:r';
+      if (typeof window.meting_api !== 'undefined' && window.meting_api) {
+        defaultApi = window.meting_api;
+      }
+      var apiUrl = el.dataset.api || defaultApi;
+      apiUrl = apiUrl.replace(':server', server)
+                     .replace(':type', type)
+                     .replace(':id', id)
+                     .replace(':auth', el.dataset.auth || '')
+                     .replace(':r', '');
+
+      var initPlayer = function(targetEl, audioList) {
+        if (!audioList || !audioList.length || targetEl._metingLoaded) return;
+        targetEl._metingLoaded = true;
+
+        var opt = {
+          container: targetEl,
+          audio: audioList,
+          mini: targetEl.dataset.mini === 'true',
+          fixed: targetEl.dataset.fixed !== 'false',
+          autoplay: targetEl.dataset.autoplay === 'true',
+          mutex: targetEl.dataset.mutex !== 'false',
+          lrcType: parseInt(targetEl.dataset.lrctype, 10) || (audioList[0] && audioList[0].lrc ? 3 : 0),
+          listFolded: targetEl.dataset.listfolded !== 'false',
+          preload: targetEl.dataset.preload || 'auto',
+          theme: targetEl.dataset.theme || '#6d8cff',
+          loop: targetEl.dataset.loop || 'all',
+          order: targetEl.dataset.order || 'list',
+          volume: parseFloat(targetEl.dataset.volume) || 0.7,
+          listMaxHeight: targetEl.dataset.listmaxheight || '240px',
+          storageName: targetEl.dataset.storagename || 'metingjs'
+        };
+
+        window.aplayers = window.aplayers || [];
+        var ap = new window.APlayer(opt);
+        window.aplayers.push(ap);
+        targetEl._aplayer = ap;
+
+        initPlayerDock();
+      };
+
+      if (cached && Array.isArray(cached) && cached.length) {
+        // Immediate instant rendering from cache!
+        initPlayer(el, cached);
+      }
+
+      // Background / Initial fetch
+      (function(targetEl, url, key) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              var data = JSON.parse(xhr.responseText);
+              if (Array.isArray(data) && data.length) {
+                try {
+                  localStorage.setItem(key, JSON.stringify({ time: Date.now(), data: data }));
+                } catch (e2) {}
+                if (!targetEl._metingLoaded) {
+                  initPlayer(targetEl, data);
+                }
+              }
+            } catch (e3) {}
+          }
+        };
+        xhr.send();
+      })(el, apiUrl, cacheKey);
+    }
+  }
+
+  function setup() {
+    loadMetingFast();
     initPlayerDock();
   }
 
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+
   window.addEventListener('load', function() {
-    setTimeout(initPlayerDock, 300);
-    setTimeout(initPlayerDock, 1200);
+    setTimeout(setup, 100);
+    setTimeout(setup, 600);
   });
 
   document.addEventListener('pjax:complete', function() {
-    setTimeout(initPlayerDock, 300);
+    setTimeout(setup, 100);
   });
 })();
