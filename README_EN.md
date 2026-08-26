@@ -1,4 +1,4 @@
-# New-Aplayer (Frosted Glass & Docking Edition)
+# New-Aplayer
 
 <div align="center">
 
