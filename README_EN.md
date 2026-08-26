@@ -1,4 +1,4 @@
-# New-Aplayer
+# New-Aplayer (Frosted Glass & Docking Edition)
 
 <div align="center">
 
@@ -69,6 +69,9 @@ This plugin has been integrated and verified across modern production environmen
 ## 🚀 Quick Start & Installation
 
 This project adopts a standardized Hexo local source module integration approach. Pre-compiled CommonJS runtime files are included directly in the repository:
+
+> 💡 **100% Standalone Solution (No Legacy Plugins Required)**:
+> This package is a complete, self-contained standalone plugin. All rendering tags, generation pipelines, stylesheets, and scripts are fully bundled within. **New sites DO NOT need to pre-install the legacy `hexo-tag-aplayer` or any prerequisite music plugins.**
 
 ### Step 1: Clone source into your blog's `source` folder
 
@@ -251,6 +254,9 @@ npx hexo server -p 4000
 
 #### Q3: Why didn't my edits in `lib/*.es` take effect?
 **A**: You must run `npm run build` in `source/New-Aplayer` to transpile ES6 `.es` files into CommonJS `.js` files before generating Hexo.
+
+#### Q4: My Hexo blog has never installed any APlayer plugin before. Do I need to install the original version first?
+**A**: **No, not at all!** `New-Aplayer` is a 100% self-contained standalone plugin. All tag parsers, dependencies, and frosted-glass assets are fully bundled. Brand-new sites only need to follow the 3-step installation above to run immediately.
 
 ---
 

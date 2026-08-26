@@ -1,4 +1,4 @@
-# New-Aplayer
+# New-Aplayer (毛玻璃与贴边拖拽增强版)
 
 <div align="center">
 
@@ -69,6 +69,9 @@
 ## 🚀 快速开始与安装
 
 本项目采用标准的 Hexo 本地源码模块集成方案，预编译好的 CommonJS 运行文件已直接包含在仓库中，开箱即用：
+
+> 💡 **完全独立闭环（无需安装原版 APlayer 插件）**：
+> 本项目为完整的一站式独立插件，所有渲染标签、生成管道、样式及脚本均已全量内置，**新站点完全不需要提前安装原版 `hexo-tag-aplayer` 或任何前置音乐插件**。
 
 ### 第一步：克隆源码至博客的 `source` 目录
 
@@ -253,6 +256,9 @@ npx hexo server -p 4000
 
 #### Q3: 为什么修改了 `lib/*.es` 代码后 Hexo 博客没有生效？
 **A**: 必须在 `source/New-Aplayer` 目录下运行 `npm run build`，将 ES6 源码编译为 Node.js 可执行的 CommonJS 文件（`.js`），然后重新运行 `hexo clean && hexo generate`。
+
+#### Q4: 我的 Hexo 博客以前从未安装过 APlayer 插件，需要先装老版本吗？
+**A**: **完全不需要！** `New-Aplayer` 是一个 100% 独立且闭环的完整插件包，所有标签解析、依赖库与毛玻璃资源均已全量内置。新站点只需按照上方三步安装即可直接运行。
 
 ---
 
