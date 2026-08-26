@@ -92,10 +92,12 @@ Edit the root `package.json` of your **Hexo blog**, adding the local file depend
 Then install the dependency link from your **Hexo blog root**:
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
-> **Note**: Always run `npm install` from the **Hexo blog root**, rather than inside `source/New-Aplayer/`, to prevent Hexo from mistakenly scanning nested `node_modules` inside the source directory.
+> **Note**:
+> 1. Always run `npm install` from the **Hexo blog root**, rather than inside `source/New-Aplayer/`, to prevent Hexo from mistakenly scanning nested `node_modules` inside the source directory.
+> 2. Using `--legacy-peer-deps` avoids `ERESOLVE` errors when your Hexo blog contains older legacy plugins.
 
 ---
 

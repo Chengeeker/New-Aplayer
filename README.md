@@ -92,10 +92,12 @@ git clone https://github.com/Chengeeker/New-Aplayer.git source/New-Aplayer
 然后在 **Hexo 博客根目录** 下执行一次安装：
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
 
-> **安全提示**：请在 **Hexo 博客根目录** 下执行 `npm install`，避免在 `source/New-Aplayer/` 内部直接生成额外的 `node_modules`，以防止 Hexo 错误扫描其内部依赖。仓库已预置编译好的运行时代码，开箱即用。
+> **提示**：
+> 1. 请务必在 **Hexo 博客根目录** 下执行安装，避免在 `source/New-Aplayer/` 内部生成额外的 `node_modules` 导致 Hexo 误扫描；
+> 2. 使用 `--legacy-peer-deps` 可以避免 npm 严格校验博客中其他年代久远的第三方旧插件时抛出 `ERESOLVE` 错误。
 
 ---
 
