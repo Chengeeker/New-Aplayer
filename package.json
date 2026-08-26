@@ -18,12 +18,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Chengeeker/hexo-tag-aplayer.git"
+    "url": "git+https://github.com/Chengeeker/New-Aplayer.git"
   },
   "bugs": {
-    "url": "https://github.com/Chengeeker/hexo-tag-aplayer/issues"
+    "url": "https://github.com/Chengeeker/New-Aplayer/issues"
   },
-  "homepage": "https://github.com/Chengeeker/hexo-tag-aplayer#readme",
+  "homepage": "https://github.com/Chengeeker/New-Aplayer#readme",
   "dependencies": {
     "aplayer": "^1.10.0",
     "babel-polyfill": "^6.16.0",

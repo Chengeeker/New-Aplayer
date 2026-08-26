@@ -70,7 +70,7 @@
 
 ```bash
 cd "your-hexo-blog"
-git clone https://github.com/Chengeeker/hexo-tag-aplayer.git source/New-Aplayer
+git clone https://github.com/Chengeeker/New-Aplayer.git source/New-Aplayer
 cd source/New-Aplayer
 npm install
 npm run build
@@ -90,7 +90,7 @@ npm run build
 ```bash
 cd "your-hexo-blog"
 rm -rf node_modules/hexo-tag-aplayer
-git clone https://github.com/Chengeeker/hexo-tag-aplayer.git node_modules/hexo-tag-aplayer
+git clone https://github.com/Chengeeker/New-Aplayer.git node_modules/hexo-tag-aplayer
 cd node_modules/hexo-tag-aplayer
 npm install
 npm run build
