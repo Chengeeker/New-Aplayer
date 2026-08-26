@@ -59,7 +59,7 @@ Clone directly into your blog's `source/New-Aplayer` directory:
 
 ```bash
 cd "your-hexo-blog"
-git clone https://github.com/your-username/New-Aplayer.git source/New-Aplayer
+git clone https://github.com/Chengeeker/hexo-tag-aplayer.git source/New-Aplayer
 cd source/New-Aplayer
 npm install
 npm run build
@@ -79,7 +79,7 @@ Then add the local file dependency in your root `package.json`:
 ```bash
 cd "your-hexo-blog"
 rm -rf node_modules/hexo-tag-aplayer
-git clone https://github.com/your-username/New-Aplayer.git node_modules/hexo-tag-aplayer
+git clone https://github.com/Chengeeker/hexo-tag-aplayer.git node_modules/hexo-tag-aplayer
 cd node_modules/hexo-tag-aplayer
 npm install
 npm run build

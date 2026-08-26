@@ -14,16 +14,16 @@
     "player",
     "aplayer"
   ],
-  "author": "Grzhan",
+  "author": "Chengeeker & Grzhan",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-name/New-Aplayer.git"
+    "url": "git+https://github.com/Chengeeker/hexo-tag-aplayer.git"
   },
   "bugs": {
-    "url": "https://github.com/grzhan/hexo-tag-aplayer/issues"
+    "url": "https://github.com/Chengeeker/hexo-tag-aplayer/issues"
   },
-  "homepage": "https://github.com/grzhan/hexo-tag-aplayer#readme",
+  "homepage": "https://github.com/Chengeeker/hexo-tag-aplayer#readme",
   "dependencies": {
     "aplayer": "^1.10.0",
     "babel-polyfill": "^6.16.0",

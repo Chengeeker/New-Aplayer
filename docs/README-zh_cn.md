@@ -1,226 +1,239 @@
-# hexo-tag-aplayer
+# New-Aplayer (iOS Liquid Glass Edition)
 
-![npm](https://img.shields.io/npm/v/hexo-tag-aplayer.svg)  ![npm](https://img.shields.io/npm/l/hexo-tag-aplayer.svg)
+<div align="center">
 
-[APlayer](https://github.com/MoePlayer/APlayer) 播放器的 Hexo 标签插件（现已支持 [MetingJS](https://github.com/metowolf/MetingJS)）。
+[![Hexo](https://img.shields.io/badge/Hexo-5.0+-blue.svg)](https://hexo.io/)
+[![APlayer](https://img.shields.io/badge/APlayer-1.10.1-red.svg)](https://aplayer.js.org/)
+[![MetingJS](https://img.shields.io/badge/MetingJS-1.2.0-green.svg)](https://github.com/metowolf/MetingJS)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**专为 Hexo 博客深度定制的 iOS Liquid Glass 拟物毛玻璃音乐播放器插件**
 
+[English Documentation](./README_EN.md) · [中文文档](./README.md) · [实测效果报告](../../walkthrough.md)
 
-- [安装](#%E5%AE%89%E8%A3%85)
-- [依赖](#%E4%BE%9D%E8%B5%96)
-- [使用](#%E4%BD%BF%E7%94%A8)
-  - [标签参数](#%E6%A0%87%E7%AD%BE%E5%8F%82%E6%95%B0)
-  - [歌词标签](#%E6%AD%8C%E8%AF%8D%E6%A0%87%E7%AD%BE)
-  - [播放列表](#%E6%92%AD%E6%94%BE%E5%88%97%E8%A1%A8)
-  - [MeingJS 支持 (3.0 新功能)](#meingjs-%E6%94%AF%E6%8C%81-30-%E6%96%B0%E5%8A%9F%E8%83%BD)
-  - [PJAX 兼容](#pjax-%E5%85%BC%E5%AE%B9)
-- [自定义配置（3.0 新功能）](#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%EF%BC%8830-%E6%96%B0%E5%8A%9F%E8%83%BD%EF%BC%89)
-- [故障排除](#%E6%95%85%E9%9A%9C%E6%8E%92%E9%99%A4)
-  - [标签参数空格问题](#%E6%A0%87%E7%AD%BE%E5%8F%82%E6%95%B0%E7%A9%BA%E6%A0%BC%E9%97%AE%E9%A2%98)
-  - [重复载入 Aplayer.js 资源脚本问题](#%E9%87%8D%E5%A4%8D%E8%BD%BD%E5%85%A5-aplayerjs-%E8%B5%84%E6%BA%90%E8%84%9A%E6%9C%AC%E9%97%AE%E9%A2%98)
-- [LICENSE](#license)
+</div>
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+---
 
+## 目录
+- [✨ 功能特性](#-功能特性)
+- [📸 视觉效果展示](#-视觉效果展示)
+- [🚀 快速开始与安装](#-快速开始与安装)
+- [⚙️ 配置说明 (`_config.yml`)](#️-配置说明-_configyml)
+- [🏷️ 标签用法 (Tag Plugins)](#️-标签用法-tag-plugins)
+- [🛠️ 二次开发与 Fork 定制指南](#️-二次开发与-fork-定制指南)
+  - [项目目录结构](#项目目录结构)
+  - [核心代码模块职责](#核心代码模块职责)
+  - [修改指引：想改什么、改哪个文件](#修改指引想改什么改哪个文件)
+  - [构建与本地验证流程](#构建与本地验证流程)
+- [❓ 常见问题 (FAQ)](#-常见问题-faq)
+- [📄 开源协议](#-开源协议)
 
+---
 
-![plugin screenshot](http://7jpp1d.com1.z0.glb.clouddn.com/QQ20160202-5.png)
+## ✨ 功能特性
 
-## 安装
+1. **iOS Liquid Glass 流体毛玻璃质感**：
+   - 采用高规格多层模糊渲染（`backdrop-filter: blur(28px) saturate(190%)`）。
+   - 结合高光镜面边框微光（`inset 0 1px 1px rgba(255,255,255,0.9)`）与深层流体弥散阴影，完美适配浅色与深色（Dark Mode）自适应主题。
+2. **全局悬浮歌词胶囊 HUD**：
+   - 脱离播放器狭窄底栏，独立置于屏幕中央上方呈胶囊状展示，支持单句高光、双语歌词与优雅淡入淡出。
+   - 歌词 HUD 支持全屏幕鼠标/触控 **2D 自由拖拽**。
+3. **全自由拖拽 + 屏幕边缘吸附 Mini-Orb**：
+   - **自由 2D 拖拽**：按住播放器空白处可在屏幕任意位置随意拖拽放置，视口边界自动保护。
+   - **贴边半球吸附**：靠近屏幕左/右边缘（< 70px）或点击专属贴边按钮 `|←` 时，自动折叠为 iOS 拟物半球 Mini-Orb，露出 360° 匀速旋转黑胶唱片盘与播放微光。
+   - **边缘沿轴滑动**：吸附状态下可沿屏幕边缘上下自由滑动停驻；向屏幕内侧拉拽即可顺滑展开。
+   - **状态记忆**：基于 `localStorage` 自动记录吸附与停靠位置，页面跳转（PJAX）与刷新不丢失。
+4. **移动端深度响应式适配**：
+   - 播放器底栏高度优化为紧凑 56px，默认自动折叠歌单（`list_folded: true`），彻底杜绝遮挡移动端内容。
+   - 消除歌词基线裁切，在小屏手机上垂直精准居中。
+5. **MetingJS API 代理路由智能修复**：
+   - 原生修复 MetingJS 在自建 API 解析时因缺失 `:server/:type/:id` 占位符导致 404 与歌曲跳过错误（“An audio error has occurred”）。
 
+---
+
+## 📸 视觉效果展示
+
+| 场景 | 效果截图 | 交互说明 |
+| :--- | :--- | :--- |
+| **桌面端折叠播放** | ![桌面端折叠播放](https://raw.githubusercontent.com/username/repo/master/docs/demo_desktop.png) | 默认折叠歌单，悬浮歌词胶囊居中呈现，控制栏新增 `|←` 一键吸附按钮。 |
+| **左/右边缘吸附 Mini-Orb** | ![边缘吸附](https://raw.githubusercontent.com/username/repo/master/docs/demo_dock.png) | 自动吸附为纯净半球黑胶唱片，可沿边缘上下滑动，点击即弹性回弹展开。 |
+| **手机端适配 (390px)** | ![手机端适配](https://raw.githubusercontent.com/username/repo/master/docs/demo_mobile.png) | 56px 紧凑底栏，歌词居中零裁切，不遮挡主体内容。 |
+
+---
+
+## 🚀 快速开始与安装
+
+### 方式一：直接作为 Hexo 源码模块引入（推荐）
+
+直接将本项目克隆到 Hexo 博客的 `source/New-Aplayer` 目录下：
+
+```bash
+cd "your-hexo-blog"
+git clone https://github.com/Chengeeker/hexo-tag-aplayer.git source/New-Aplayer
+cd source/New-Aplayer
+npm install
+npm run build
 ```
-npm install --save hexo-tag-aplayer
-```
 
-## 依赖
-
-+ APlayer.js > 1.8.0
-+ Meting.js > 1.1.1
-
-## 使用
-
-```
-{% aplayer title author url [picture_url, narrow, autoplay, width:xxx, lrc:xxx] %}
-```
-
-### 标签参数
-
-- `title` : 曲目标题
-- `author`: 曲目作者
-- `url`: 音乐文件 URL 地址
-- `picture_url`: (可选) 音乐对应的图片地址
-- `narrow`: （可选）播放器袖珍风格
-- `autoplay`:  (可选) 自动播放，移动端浏览器暂时不支持此功能
-- `width:xxx`: (可选) 播放器宽度 (默认: 100%)
-- `lrc:xxx`: （可选）歌词文件 URL 地址
-
-当开启 Hexo 的 [文章资源文件夹](https://hexo.io/zh-cn/docs/asset-folders.html#%E6%96%87%E7%AB%A0%E8%B5%84%E6%BA%90%E6%96%87%E4%BB%B6%E5%A4%B9) 功能时，可以将图片、音乐文件、歌词文件放入与文章对应的资源文件夹中，然后直接引用：
-
-```
-{% aplayer "Caffeine" "Jeff Williams" "caffeine.mp3" "picture.jpg" "lrc:caffeine.txt" %}
-```
-
-### 歌词标签
-
-除了使用标签 `lrc` 选项来设定歌词，你也可以直接使用 `aplayerlrc` 标签来直接插入歌词文本在博客中：
-
-```
-{% aplayerlrc "title" "author" "url" "autoplay" %}
-[00:00.00]lrc here
-{% endaplayerlrc %}
-```
-
-### 播放列表
-
-```
-{% aplayerlist %}
+并在 Hexo 根目录的 `package.json` 中配置依赖指向：
+```json
 {
-    "narrow": false,                          // （可选）播放器袖珍风格
-    "autoplay": true,                         // （可选) 自动播放，移动端浏览器暂时不支持此功能
-    "mode": "random",                         // （可选）曲目循环类型，有 'random'（随机播放）, 'single' (单曲播放), 'circulation' (循环播放), 'order' (列表播放)， 默认：'circulation' 
-    "showlrc": 3,                             // （可选）歌词显示配置项，可选项有：1,2,3
-    "mutex": true,                            // （可选）该选项开启时，如果同页面有其他 aplayer 播放，该播放器会暂停
-    "theme": "#e6d0b2",	                      // （可选）播放器风格色彩设置，默认：#b7daff
-    "preload": "metadata",                    // （可选）音乐文件预载入模式，可选项： 'none' 'metadata' 'auto', 默认: 'auto'
-    "listmaxheight": "513px",                 // (可选) 该播放列表的最大长度
-    "music": [
-        {
-            "title": "CoCo",
-            "author": "Jeff Williams",
-            "url": "caffeine.mp3",
-            "pic": "caffeine.jpeg",
-            "lrc": "caffeine.txt"
-        },
-        {
-            "title": "アイロニ",
-            "author": "鹿乃",
-            "url": "irony.mp3",
-            "pic": "irony.jpg"
-        }
-    ]
+  "dependencies": {
+    "hexo-tag-aplayer": "file:source/New-Aplayer"
+  }
 }
-{% endaplayerlist %}
 ```
 
-### MeingJS 支持 (3.0 新功能)
+### 方式二：直接克隆至 `node_modules` 替换原生插件
 
-[MetingJS](https://github.com/metowolf/MetingJS) 是基于[Meting API](https://github.com/metowolf/Meting) 的 APlayer 衍生播放器，引入 MetingJS 后，播放器将支持对于 QQ音乐、网易云音乐、虾米、酷狗、百度等平台的音乐播放。
+```bash
+cd "your-hexo-blog"
+rm -rf node_modules/hexo-tag-aplayer
+git clone https://github.com/Chengeeker/hexo-tag-aplayer.git node_modules/hexo-tag-aplayer
+cd node_modules/hexo-tag-aplayer
+npm install
+npm run build
+```
 
-如果想在本插件中使用 MetingJS，请在 Hexo 配置文件 `_config.yml` 中设置：
+---
+
+## ⚙️ 配置说明 (`_config.yml`)
+
+在 Hexo 站点根目录的 `_config.yml` 中添加如下配置：
 
 ```yaml
+# APlayer & Meting 全局配置
 aplayer:
-  meting: true
+  meting: true                                  # 启用 MetingJS 网易云/QQ音乐等平台歌单解析
+  meting_api: https://api.injahow.cn/meting/    # Meting API 地址（插件会自动补全参数模板）
+  asset_inject: true                            # 自动将毛玻璃样式与拖拽引擎注入全站页面
+  global:
+    enable: true                                # 开启全站固定底栏吸底播放器
+    id: 13104322073                             # 歌单 ID / 歌曲 ID
+    server: netease                             # 音乐平台: netease(网易云) / tencent(QQ音乐) / kugou(酷狗)
+    type: playlist                              # 类型: playlist(歌单) / song(单曲) / artist(歌手)
+    fixed: true                                 # 固定在页面底部
+    autoplay: false                             # 是否自动播放 (由于浏览器策略，默认建议 false)
+    order: list                                 # 播放顺序: list(列表) / random(随机)
+    preload: metadata                           # 预加载策略: metadata / auto / none
+    mutex: true                                 # 互斥播放: 同时只允许一个播放器发声
+    list_folded: true                           # 默认折叠歌单列表（推荐 true，防止移动端遮挡）
 ```
 
-接着就可以通过 `{% meting ...%}` 在文章中使用 MetingJS 播放器了：
+---
 
-```
-<!-- 简单示例 (id, server, type)  -->
-{% meting "60198" "netease" "playlist" %}
+## 🏷️ 标签用法 (Tag Plugins)
 
-<!-- 进阶示例 -->
-{% meting "60198" "netease" "playlist" "autoplay" "mutex:false" "listmaxheight:340px" "preload:none" "theme:#ad7a86"%}
-```
+除了全局吸底播放器，你还可以在任意 Markdown 文章中使用标签插入播放器：
 
-有关  `{% meting %}`  的选项列表如下:
-
-| 选项          | 默认值     | 描述                                                        |
-| ------------- | ---------- | ----------------------------------------------------------- |
-| id            | **必须值** | 歌曲 id / 播放列表 id / 相册 id / 搜索关键字                |
-| server        | **必须值** | 音乐平台: `netease`, `tencent`, `kugou`, `xiami`, `baidu`   |
-| type          | **必须值** | `song`, `playlist`, `album`, `search`, `artist`             |
-| fixed         | `false`    | 开启固定模式                                                |
-| mini          | `false`    | 开启迷你模式                                                |
-| loop          | `all`      | 列表循环模式：`all`, `one`,`none`                           |
-| order         | `list`     | 列表播放模式： `list`, `random`                             |
-| volume        | 0.7        | 播放器音量                                                  |
-| lrctype       | 0          | 歌词格式类型                                                |
-| listfolded    | `false`    | 指定音乐播放列表是否折叠                                    |
-| storagename   | `metingjs` | LocalStorage 中存储播放器设定的键名                         |
-| autoplay      | `true`     | 自动播放，移动端浏览器暂时不支持此功能                      |
-| mutex         | `true`     | 该选项开启时，如果同页面有其他 aplayer 播放，该播放器会暂停 |
-| listmaxheight | `340px`    | 播放列表的最大长度                                          |
-| preload       | `auto`     | 音乐文件预载入模式，可选项： `none`, `metadata`, `auto`     |
-| theme         | `#ad7a86`  | 播放器风格色彩设置                                          |
-
-关于如何设置自建的 Meting API 服务器地址，以及其他 MetingJS 配置，请参考章节[自定义配置](#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE30-%E6%96%B0%E5%8A%9F%E8%83%BD)
-
-### PJAX 兼容
-
-若在 Hexo 中使用了 PJAX，可能需要自己手动清理 APlayer 全局实例：
-
-```js
-$(document).on('pjax:start', function () {
-    if (window.aplayers) {
-        for (let i = 0; i < window.aplayers.length; i++) {
-            window.aplayers[i].destroy();
-        }
-        window.aplayers = [];
-    }
-});
+### 1. Meting 平台歌单标签
+```markdown
+{% meting "13104322073" "netease" "playlist" "listfolded:true" %}
 ```
 
-## 自定义配置（3.0 新功能）
-
-现在你可以在 Hexo 配置文件  `_config.yml` 中配置本插件：
-
-```yaml
-aplayer:
-  script_dir: some/place                        # Public 目录下脚本目录路径，默认: 'assets/js'
-  style_dir: some/place                         # Public 目录下样式目录路径，默认: 'assets/css'
-  cdn: http://xxx/aplayer.min.js                # 引用 APlayer.js 外部 CDN 地址 (默认不开启)
-  style_cdn: http://xxx/aplayer.min.css         # 引用 APlayer.css 外部 CDN 地址 (默认不开启)
-  meting: true                                  # MetingJS 支持
-  meting_api: http://xxx/api.php                # 自定义 Meting API 地址
-  meting_cdn: http://xxx/Meing.min.js           # 引用 Meting.js 外部 CDN 地址 (默认不开启)
-  asset_inject: true                            # 自动插入 Aplayer.js 与 Meting.js 资源脚本, 默认开启
-  externalLink: http://xxx/aplayer.min.js       # 老版本参数，功能与参数 cdn 相同
+### 2. 标准 APlayer 单曲标签
+```markdown
+{% aplayer "歌曲名称" "歌手名" "https://domain.com/music.mp3" "https://domain.com/cover.jpg" "autoplay:false" %}
 ```
 
-## 故障排除
+---
 
-### 标签参数空格问题
+## 🛠️ 二次开发与 Fork 定制指南
 
-在 Hexo 标签中，用户可能无法直接在标签参数中[加入空格](https://github.com/hexojs/hexo/issues/1455)
+本项目为标准 ES6 + Babel + Hexo Generator 架构，代码结构清晰，任何人 Fork 之后都可以轻松上手进行二次定制。
 
-如果遇到这类问题，请直接将参数用双引号括起来使用，如下所示：
+### 项目目录结构
 
-```
-{% aplayer "Caffeine" "Jeff Williams" "caffeine.mp3" "autoplay" "width:70%" "lrc:caffeine.txt" %}
-```
-
-### 重复载入 Aplayer.js 资源脚本问题
-
-本插件通过 `after_render:html`过滤器 , 将 `APlayer.js` 和 `Meting.js` 插入到使用了本插件标签 的 HTML 文件中:
-
-```html
-<html>
-  <head>
-    ...
-    <script src="assets/js/aplayer.min.js"></script>
-    <script src="assets/js/meting.min.js"></script>
-  </head>
-  ...
-</html>
-```
-
-但是 `after_render:html` 在一些情形下可能无法被正常触发:
-
-- [Does not work with hexo-renderer-jade](https://github.com/hexojs/hexo-inject/issues/1)
-- `after_render:html` 似乎在 Hexo 服务器模式默认配置中无法被调用 (`hexo server`), 遇到这种情况用户可能需要使用 `hexo-server` 的静态文件解析模式 ( `hexo server -s`) .
-
-如果在博客生成过程中，插件发现 `after_render:html` 没有被调用，那么插件将会通过 `after_post_render` 过滤器来植入脚本。但是使用 `after_post_render` 会有重复载入 `APlayer.js` 的情况（例如当一个页面中存在多篇博客时），以及一些非文章页面将无法使用本插件。
-
-如果想完全解决这个问题，用户可能需要自己在主题文件中手动加入 `Aplayer.js` 与 `Meting.js`，同时关闭插件的自动脚本插入功能：
-
-```yaml
-aplayer:
-  asset_inject: false
+```text
+New-Aplayer/
+├── assets/                       # 核心静态资源库（前端直引资源）
+│   ├── APlayer.glass.css         # ★ iOS Liquid Glass 核心样式表（外观定制）
+│   └── APlayer.dock.js           # ★ 拖拽与贴边吸附引擎（交互定制）
+├── common/                       # 公共常量与工具函数
+│   ├── constant.es               # 常量定义与资源标记 Marker
+│   └── util.es                   # 选项提取与工具函数
+├── lib/                          # 后端渲染引擎（Babel ES6 源码）
+│   ├── config.es                 # Hexo 配置解析与静态资源注册器
+│   ├── view.es                   # HTML 视图资源注入与 DOM 操作
+│   └── tag/                      # Hexo 标签解析器
+│       ├── base.es               # 标签基础类
+│       ├── player.es             # {% aplayer %} 标签渲染
+│       ├── playerLyric.es        # 歌词标签渲染
+│       ├── playerList.es         # 播放列表标签渲染
+│       └── playerMeting.es       # ★ {% meting %} 标签解析与 API 路由
+├── scripts/                      # 构建工具
+│   └── build.js                  # Babel 编译脚本 (ES6 .es -> CommonJS .js)
+├── index.es                      # ★ 插件总入口文件 (Hexo 过滤器与全局播放器生成)
+├── package.json                  # 项目依赖与编译脚本
+├── README.md                     # 中文说明文档
+└── README_EN.md                  # 英文说明文档
 ```
 
-## LICENSE
+---
 
-MIT
+### 核心代码模块职责
+
+1. **`assets/APlayer.glass.css`**：
+   - 负责播放器底栏、吸附半球 Mini-Orb、悬浮歌词胶囊 HUD、播放列表卡片的 iOS 毛玻璃拟物风格、阴影、微光边框及媒体查询。
+2. **`assets/APlayer.dock.js`**：
+   - 负责 PC 鼠标与手机触屏手势捕获、2D 自由拖拽、屏幕边缘吸附计算、Y 轴沿边缘滑动、点击展开/暂停事件调度与 `localStorage` 记忆。
+3. **`lib/config.es`**：
+   - 负责读取站点 `_config.yml` 中的 `aplayer` 配置项，向 Hexo 注册静态资产生成管道（使得 `assets/` 下的 CSS/JS 自动生成到博客的 `public/assets/` 目录中）。
+4. **`index.es`**：
+   - 插件主入口，负责在页面 HTML 渲染阶段（`after_render:html`）注入全局固定播放器 DOM、样式链接及脚本。
+5. **`lib/tag/playerMeting.es`**：
+   - 负责解析文章中的 `{% meting %}` 标签，格式化 API 模板，避免跨域或 404。
+
+---
+
+### 修改指引：想改什么、改哪个文件
+
+| 定制诉求 | 涉及修改的文件 | 具体修改位置与说明 |
+| :--- | :--- | :--- |
+| **修改毛玻璃颜色/模糊度/透明度** | `assets/APlayer.glass.css` | 修改 `:root` 变量 `--aplayer-glass-bg`、`--aplayer-glass-blur`、`--aplayer-glass-border` 等。 |
+| **修改贴边半球的尺寸/圆角** | `assets/APlayer.glass.css` | 搜索 `.aplayer-docked-left` 与 `.aplayer-docked-right`，修改 `width: 50px`、`border-radius: 0 28px 28px 0`。 |
+| **调整吸附灵敏度阈值** | `assets/APlayer.dock.js` | 搜索 `snapThreshold = Math.min(70, vw * 0.18)`，增大或减小触发贴边的像素距离。 |
+| **修改贴边按钮图标** | `assets/APlayer.dock.js` | 搜索 `injectDockButton()` 函数，替换内部的 `btn.innerHTML` SVG 矢量图形。 |
+| **修改默认是否折叠歌单** | `index.es` & `_config.yml` | 在 `index.es` 中修改 `data-listfolded` 默认值，或在 `_config.yml` 中设置 `list_folded: true`。 |
+| **新增自定义 Meting API 节点** | `lib/tag/playerMeting.es` | 搜索 `formatMetingApi`，调整拼接的查询参数规则。 |
+
+---
+
+### 构建与本地验证流程
+
+每次修改了 `.es` 源代码或 `assets/` 资源后，按以下三步完成构建：
+
+```bash
+# 1. 在 New-Aplayer 目录下运行 Babel 编译（生成 index.js 及 lib/*.js）
+cd source/New-Aplayer
+npm run build
+
+# 2. 返回 Hexo 博客根目录，清理并重新生成静态文件
+cd ../..
+npx hexo clean && npx hexo generate
+
+# 3. 启动本地预览服务器
+npx hexo server -p 4000
+```
+
+打开浏览器访问 `http://localhost:4000` 即可实时查看最新效果。
+
+---
+
+## ❓ 常见问题 (FAQ)
+
+#### Q1: 为什么控制台提示 "An audio error has occurred, player will skip forward..."？
+**A**: 这是由于部分三方 Meting API 未正确配置路由模板或歌曲需要平台会员权限。本项目已内置参数模板补全（`:server/:type/:id`），请确保 `_config.yml` 中配置了可用的 `meting_api` 地址（如 `https://api.injahow.cn/meting/`）。
+
+#### Q2: 手机端切换页面后播放器位置会重置吗？
+**A**: 不会。播放器与贴边半球的坐标已自动存入浏览器的 `localStorage`，PJAX 无刷新换页和全页面重载均会保持当前位置。
+
+#### Q3: 为什么修改了 `lib/*.es` 代码后 Hexo 博客没有生效？
+**A**: 必须在 `source/New-Aplayer` 目录下运行 `npm run build`，将 ES6 源码编译为 Node.js 可执行的 CommonJS 文件（`.js`），然后重新运行 `hexo clean && hexo generate`。
+
+---
+
+## 📄 开源协议
+
+本项目基于 [MIT License](LICENSE) 开源，欢迎提交 Issue 与 Pull Request！
