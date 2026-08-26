@@ -52,6 +52,8 @@
 6. **Meting API Proxy Route Fix & Tag Syntax Enhancements**:
    - Automatically handles query parameter template injection (`?server=:server&type=:type&id=:id&r=:r`), eliminating 404s and playback skipping issues ("An audio error has occurred").
    - Full tag parser compatibility with `autoplay:false`, `listfolded:true`, `fixed:true`, etc.
+7. **100% Standalone & Self-Contained (Zero Prerequisite Plugins)**:
+   - Completely decoupled from the legacy `hexo-tag-aplayer` npm package. All tag parsers, Hexo asset pipelines, stylesheets, and interaction engines are fully self-contained. New blogs can run immediately with zero prerequisite plugins.
 
 ---
 

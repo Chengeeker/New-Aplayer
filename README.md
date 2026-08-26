@@ -52,6 +52,8 @@
 6. **Meting API 路由修复与标签语法增强**：
    - 自动补全 API 参数占位符（`:server/:type/:id`），避免 404 与歌曲跳过报错（“An audio error has occurred”）。
    - 标签解析全面兼容 `autoplay:false`、`listfolded:true`、`fixed:true` 等键值与布尔写法。
+7. **100% 独立闭环运行（零前置插件依赖）**：
+   - 彻底脱离对原版 `hexo-tag-aplayer` 及旧版 npm 包的依赖，所有标签解析器、Hexo 资产管道、样式表与交互引擎均已全量内置，新站点无需预装任何前置插件即可直接开箱即用。
 
 ---
 
