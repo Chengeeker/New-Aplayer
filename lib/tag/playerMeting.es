@@ -56,8 +56,11 @@ export default class MetingTag extends BaseTag {
         case option.startsWith('theme:'):
           settings.theme = extractOptionValue(option)
           break
+        case option.startsWith('api:'):
+          settings.api = extractOptionValue(option)
+          break
         default:
-          throwError(`Unrecognized tag argument(${index + 1}): ${value}`)
+          throwError(`Unrecognized tag argument(${index + 1}): ${option}`)
       }
     })
     return settings
@@ -66,7 +69,12 @@ export default class MetingTag extends BaseTag {
   generate() {
     let settingLiteral = ''
     Object.entries(this.settings).forEach(([key, value]) => {
-      settingLiteral += ` data-${key}="${value}"`
+      if (key === 'api') {
+        const val = value.includes(':server') ? value : `${value.replace(/\/?$/, '/')}?server=:server&type=:type&id=:id&r=:r`
+        settingLiteral += ` data-api="${val}"`
+      } else {
+        settingLiteral += ` data-${key}="${value}"`
+      }
     })
     return `
     <div id="${this.id}" class="aplayer ${APLAYER_TAG_MARKER} ${METING_TAG_MARKER}"

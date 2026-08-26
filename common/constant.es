@@ -1,8 +1,10 @@
 export const APLAYER_TAG_MARKER = `aplayer-tag-marker`
 export const APLAYER_SCRIPT_MARKER = `aplayer-script-marker`
 export const APLAYER_SECONDARY_SCRIPT_MARKER = `aplayer-secondary-script-marker`
+export const APLAYER_DOCK_SCRIPT_MARKER = `aplayer-dock-script-marker`
 export const APLAYER_STYLE_MARKER = `aplayer-style-marker`
 export const APLAYER_SECONDARY_STYLE_MARKER = `aplayer-secondary-style-marker`
+export const APLAYER_GLASS_STYLE_MARKER = `aplayer-glass-style-marker`
 export const METING_TAG_MARKER = `meting-tag-marker`
 export const METING_SCRIPT_MARKER = `meting-script-marker`
 export const METING_SECONDARY_SCRIPT_MARKER = `meting-secondary-script-marker`

@@ -2,5 +2,10 @@ node_modules
 npm-debug.log
 *.js
 !gulpfile.babel.js
+!scripts/build.js
+!index.js
+!common/**/*.js
+!lib/**/*.js
+!assets/**/*
 package-lock.json
 .idea

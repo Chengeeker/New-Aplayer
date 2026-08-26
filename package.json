@@ -1,9 +1,10 @@
 {
   "name": "hexo-tag-aplayer",
-  "version": "3.0.4",
-  "description": "Embed aplayer in Hexo posts/pages",
+  "version": "3.1.0",
+  "description": "A maintained, liquid-glass APlayer/MetingJS tag plugin for Hexo",
   "main": "index.js",
   "scripts": {
+    "build": "node scripts/build.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -17,7 +18,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/grzhan/hexo-tag-aplayer.git"
+    "url": "git+https://github.com/your-name/New-Aplayer.git"
   },
   "bugs": {
     "url": "https://github.com/grzhan/hexo-tag-aplayer/issues"

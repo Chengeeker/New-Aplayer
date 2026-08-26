@@ -1,0 +1,419 @@
+/**
+ * APlayer iOS Liquid Glass - Draggable & Edge Docking Engine
+ * Supports pointer-based free 2D dragging, edge vertical dragging & snapping,
+ * draggable lyrics HUD, and reliable play/pause interaction.
+ */
+(function() {
+  'use strict';
+
+  var STORAGE_KEY = 'aplayer-dock-position';
+  var state = {
+    isDocked: false,
+    dockSide: 'left',
+    posX: null,
+    posY: null
+  };
+
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        state = Object.assign(state, parsed);
+      }
+    }
+  } catch (e) {}
+
+  function getPlayer() {
+    return document.querySelector('.aplayer.aplayer-fixed');
+  }
+
+  function dockPlayer(side, posY) {
+    var player = getPlayer();
+    if (!player) return;
+    state.isDocked = true;
+    state.dockSide = side || state.dockSide || 'left';
+    if (typeof posY === 'number') {
+      state.posY = posY;
+    }
+
+    player.classList.remove('aplayer-docked-left', 'aplayer-docked-right', 'aplayer-dragging', 'aplayer-custom-pos');
+    
+    player.style.removeProperty('left');
+    player.style.removeProperty('right');
+
+    if (state.posY !== null && state.posY !== undefined) {
+      var vh = window.innerHeight;
+      var clampedY = Math.max(10, Math.min(vh - 66, state.posY));
+      player.style.setProperty('top', clampedY + 'px', 'important');
+      player.style.setProperty('bottom', 'auto', 'important');
+    } else {
+      player.style.removeProperty('top');
+      player.style.removeProperty('bottom');
+    }
+
+    if (state.dockSide === 'left') {
+      player.classList.add('aplayer-docked-left');
+    } else {
+      player.classList.add('aplayer-docked-right');
+    }
+
+    var list = player.querySelector('.aplayer-list');
+    if (list) list.classList.add('aplayer-list-hide');
+
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function undockPlayer(customX, customY) {
+    var player = getPlayer();
+    if (!player) return;
+    state.isDocked = false;
+    player.classList.remove('aplayer-docked-left', 'aplayer-docked-right', 'aplayer-dragging');
+    
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var w = player.offsetWidth || 440;
+    var h = player.offsetHeight || 66;
+
+    if (typeof customX === 'number' && typeof customY === 'number') {
+      state.posX = Math.max(0, Math.min(vw - w, customX));
+      state.posY = Math.max(0, Math.min(vh - h, customY));
+      player.classList.add('aplayer-custom-pos');
+      player.style.setProperty('left', state.posX + 'px', 'important');
+      player.style.setProperty('top', state.posY + 'px', 'important');
+      player.style.setProperty('bottom', 'auto', 'important');
+      player.style.setProperty('right', 'auto', 'important');
+    } else if (state.posX !== null && state.posY !== null) {
+      player.classList.add('aplayer-custom-pos');
+      player.style.setProperty('left', Math.max(0, Math.min(vw - w, state.posX)) + 'px', 'important');
+      player.style.setProperty('top', Math.max(0, Math.min(vh - h, state.posY)) + 'px', 'important');
+      player.style.setProperty('bottom', 'auto', 'important');
+      player.style.setProperty('right', 'auto', 'important');
+    } else {
+      player.classList.remove('aplayer-custom-pos');
+      player.style.removeProperty('top');
+      player.style.removeProperty('bottom');
+      player.style.removeProperty('left');
+      player.style.removeProperty('right');
+    }
+
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  window.APlayerDock = {
+    dock: dockPlayer,
+    undock: undockPlayer,
+    getState: function() { return state; }
+  };
+
+  function initPlayerDock() {
+    var player = getPlayer();
+    if (!player) return;
+
+    if (player.dataset.dockInitialized === 'true') return;
+    player.dataset.dockInitialized = 'true';
+
+    var body = player.querySelector('.aplayer-body');
+    var lrc = document.querySelector('.aplayer.aplayer-fixed .aplayer-lrc');
+    var pic = player.querySelector('.aplayer-pic');
+
+    // Sync play/pause state classes
+    function syncPlayingClass() {
+      if (window.aplayers && window.aplayers[0]) {
+        var ap = window.aplayers[0];
+        if (!ap.paused) {
+          player.classList.add('aplayer-playing');
+        } else {
+          player.classList.remove('aplayer-playing');
+        }
+      }
+    }
+
+    if (window.aplayers && window.aplayers[0]) {
+      window.aplayers[0].on('play', function() { player.classList.add('aplayer-playing'); });
+      window.aplayers[0].on('pause', function() { player.classList.remove('aplayer-playing'); });
+      syncPlayingClass();
+    }
+
+    // Inject sidebar dock icon into controller
+    function injectDockButton() {
+      var timeWrap = player.querySelector('.aplayer-time');
+      if (timeWrap && !timeWrap.querySelector('.aplayer-icon-dock')) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'aplayer-icon aplayer-icon-dock';
+        btn.title = '贴边收起/展开 (可自由拖拽吸附)';
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M3 4c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1s1-.45 1-1V5c0-.55-.45-1-1-1zm5.71 7.29l3.59-3.59a.996.996 0 1 1 1.41 1.41L11.41 11H20c.55 0 1 .45 1 1s-.45 1-1 1h-8.59l2.3 2.29a.996.996 0 1 1-1.41 1.41l-3.59-3.59a.996.996 0 0 1 0-1.42z"/></svg>';
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          if (state.isDocked || player.classList.contains('aplayer-docked-left') || player.classList.contains('aplayer-docked-right')) {
+            undockPlayer();
+          } else {
+            var r = player.getBoundingClientRect();
+            var side = (r.left + r.width / 2 > window.innerWidth / 2) ? 'right' : 'left';
+            dockPlayer(side, r.top);
+          }
+        });
+        timeWrap.appendChild(btn);
+      }
+    }
+    injectDockButton();
+
+    // Ensure clicking album pic anywhere reliably toggles playback
+    if (pic) {
+      pic.addEventListener('click', function(e) {
+        if (state.isDocked || player.classList.contains('aplayer-docked-left') || player.classList.contains('aplayer-docked-right')) {
+          // If docked and user clicks pic, undock & resume playback
+          e.stopPropagation();
+          e.preventDefault();
+          undockPlayer();
+          if (window.aplayers && window.aplayers[0]) {
+            if (window.aplayers[0].paused) {
+              window.aplayers[0].play();
+            }
+          }
+          return;
+        }
+
+        // When expanded, if not directly clicking button element, trigger toggle
+        if (!e.target.closest('.aplayer-button')) {
+          if (window.aplayers && window.aplayers[0]) {
+            window.aplayers[0].toggle();
+          }
+        }
+      });
+    }
+
+    // --- Unified 2D Free Dragging & Edge Dragging Engine ---
+    var drag = {
+      active: false,
+      hasMoved: false,
+      startX: 0,
+      startY: 0,
+      elemX: 0,
+      elemY: 0,
+      pointerId: null,
+      wasDocked: false,
+      dockSide: 'left'
+    };
+
+    function isInteractiveTarget(target) {
+      return Boolean(target.closest('button, .aplayer-icon, .aplayer-bar-wrap, .aplayer-volume-bar-wrap, ol, li, a, input'));
+    }
+
+    if (body) {
+      body.addEventListener('pointerdown', function(e) {
+        if (isInteractiveTarget(e.target)) return;
+
+        drag.active = true;
+        drag.hasMoved = false;
+        drag.startX = e.clientX;
+        drag.startY = e.clientY;
+        drag.pointerId = e.pointerId;
+        drag.wasDocked = state.isDocked || player.classList.contains('aplayer-docked-left') || player.classList.contains('aplayer-docked-right');
+        drag.dockSide = state.dockSide || (player.classList.contains('aplayer-docked-right') ? 'right' : 'left');
+
+        var rect = player.getBoundingClientRect();
+        drag.elemX = rect.left;
+        drag.elemY = rect.top;
+
+        try {
+          body.setPointerCapture(e.pointerId);
+        } catch (err) {}
+      });
+
+      body.addEventListener('pointermove', function(e) {
+        if (!drag.active || e.pointerId !== drag.pointerId) return;
+
+        var dx = e.clientX - drag.startX;
+        var dy = e.clientY - drag.startY;
+
+        if (!drag.hasMoved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+          drag.hasMoved = true;
+        }
+
+        if (drag.hasMoved) {
+          var vw = window.innerWidth;
+          var vh = window.innerHeight;
+
+          if (drag.wasDocked) {
+            // Check if user is dragging outward away from edge to break out of dock
+            var breakOutDistance = (drag.dockSide === 'left') ? dx : -dx;
+            if (breakOutDistance > 45) {
+              // Transition from docked to freely floating undocked drag
+              drag.wasDocked = false;
+              state.isDocked = false;
+              player.classList.remove('aplayer-docked-left', 'aplayer-docked-right');
+              player.classList.add('aplayer-dragging', 'aplayer-custom-pos');
+              
+              var w = 440;
+              var curX = (drag.dockSide === 'left') ? Math.max(0, e.clientX - 30) : Math.min(vw - w, e.clientX - w + 30);
+              var curY = Math.max(0, Math.min(vh - 66, e.clientY - 33));
+              drag.elemX = curX;
+              drag.elemY = curY;
+              drag.startX = e.clientX;
+              drag.startY = e.clientY;
+
+              player.style.setProperty('left', curX + 'px', 'important');
+              player.style.setProperty('top', curY + 'px', 'important');
+              player.style.setProperty('bottom', 'auto', 'important');
+              player.style.setProperty('right', 'auto', 'important');
+            } else {
+              // Drag up and down along the edge
+              var newDockY = Math.max(10, Math.min(vh - 66, drag.elemY + dy));
+              player.style.setProperty('top', newDockY + 'px', 'important');
+              player.style.setProperty('bottom', 'auto', 'important');
+            }
+          } else {
+            // Normal free 2D floating dragging
+            player.classList.add('aplayer-dragging', 'aplayer-custom-pos');
+            var w = player.offsetWidth || 440;
+            var h = player.offsetHeight || 66;
+
+            var newX = Math.max(0, Math.min(vw - w, drag.elemX + dx));
+            var newY = Math.max(0, Math.min(vh - h, drag.elemY + dy));
+
+            player.style.setProperty('left', newX + 'px', 'important');
+            player.style.setProperty('top', newY + 'px', 'important');
+            player.style.setProperty('bottom', 'auto', 'important');
+            player.style.setProperty('right', 'auto', 'important');
+          }
+        }
+      });
+
+      var handlePointerEnd = function(e) {
+        if (!drag.active || e.pointerId !== drag.pointerId) return;
+        drag.active = false;
+        player.classList.remove('aplayer-dragging');
+
+        try {
+          body.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+
+        if (!drag.hasMoved) {
+          // Pure click/tap without moving
+          if (drag.wasDocked) {
+            undockPlayer();
+          }
+          return;
+        }
+
+        var rect = player.getBoundingClientRect();
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        var snapThreshold = Math.min(70, vw * 0.18);
+
+        if (drag.wasDocked) {
+          // Save new Y position on the edge
+          dockPlayer(drag.dockSide, rect.top);
+        } else {
+          // Snapping check for free float
+          if (rect.left < snapThreshold) {
+            dockPlayer('left', rect.top);
+          } else if (rect.right > vw - snapThreshold) {
+            dockPlayer('right', rect.top);
+          } else {
+            state.posX = rect.left;
+            state.posY = rect.top;
+            state.isDocked = false;
+            player.classList.add('aplayer-custom-pos');
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (err2) {}
+          }
+        }
+      };
+
+      body.addEventListener('pointerup', handlePointerEnd);
+      body.addEventListener('pointercancel', handlePointerEnd);
+    }
+
+    // --- 2D Free Dragging Engine for Floating Lyrics Capsule HUD ---
+    if (lrc) {
+      var lrcDrag = {
+        active: false,
+        hasMoved: false,
+        startX: 0,
+        startY: 0,
+        elemX: 0,
+        elemY: 0,
+        pointerId: null
+      };
+
+      lrc.addEventListener('pointerdown', function(e) {
+        lrcDrag.active = true;
+        lrcDrag.hasMoved = false;
+        lrcDrag.startX = e.clientX;
+        lrcDrag.startY = e.clientY;
+        lrcDrag.pointerId = e.pointerId;
+
+        var rect = lrc.getBoundingClientRect();
+        lrcDrag.elemX = rect.left;
+        lrcDrag.elemY = rect.top;
+
+        try {
+          lrc.setPointerCapture(e.pointerId);
+        } catch (err) {}
+      });
+
+      lrc.addEventListener('pointermove', function(e) {
+        if (!lrcDrag.active || e.pointerId !== lrcDrag.pointerId) return;
+
+        var dx = e.clientX - lrcDrag.startX;
+        var dy = e.clientY - lrcDrag.startY;
+
+        if (!lrcDrag.hasMoved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+          lrcDrag.hasMoved = true;
+          lrc.classList.add('aplayer-lrc-dragging', 'aplayer-lrc-custom-pos');
+        }
+
+        if (lrcDrag.hasMoved) {
+          var vw = window.innerWidth;
+          var vh = window.innerHeight;
+          var w = lrc.offsetWidth || 260;
+          var h = lrc.offsetHeight || 38;
+
+          var newX = Math.max(8, Math.min(vw - w - 8, lrcDrag.elemX + dx));
+          var newY = Math.max(8, Math.min(vh - h - 8, lrcDrag.elemY + dy));
+
+          lrc.style.setProperty('left', newX + 'px', 'important');
+          lrc.style.setProperty('top', newY + 'px', 'important');
+          lrc.style.setProperty('bottom', 'auto', 'important');
+          lrc.style.setProperty('right', 'auto', 'important');
+          lrc.style.setProperty('transform', 'none', 'important');
+        }
+      });
+
+      var handleLrcEnd = function(e) {
+        if (!lrcDrag.active || e.pointerId !== lrcDrag.pointerId) return;
+        lrcDrag.active = false;
+        lrc.classList.remove('aplayer-lrc-dragging');
+
+        try {
+          lrc.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+
+        if (lrcDrag.hasMoved) {
+          lrc.classList.add('aplayer-lrc-custom-pos');
+        }
+      };
+
+      lrc.addEventListener('pointerup', handleLrcEnd);
+      lrc.addEventListener('pointercancel', handleLrcEnd);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPlayerDock);
+  } else {
+    initPlayerDock();
+  }
+
+  window.addEventListener('load', function() {
+    setTimeout(initPlayerDock, 300);
+    setTimeout(initPlayerDock, 1200);
+  });
+
+  document.addEventListener('pjax:complete', function() {
+    setTimeout(initPlayerDock, 300);
+  });
+})();
