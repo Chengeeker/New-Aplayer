@@ -361,7 +361,8 @@
     }
 
     // --- 2D Free Dragging Engine for Floating Lyrics Capsule HUD ---
-    if (lrc) {
+    var enableLyricsHud = player.dataset.lyricsHud !== 'false' && player.dataset.lyricshud !== 'false';
+    if (lrc && enableLyricsHud) {
       var lrcDrag = {
         active: false,
         hasMoved: false,
@@ -436,8 +437,34 @@
   }
 
   // --- Meting Fast-Cache & Acceleration Engine ---
-  var METING_CACHE_PREFIX = 'meting_cache_';
+  var METING_CACHE_PREFIX = 'meting_cache_v2_';
   var CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  function hashStr(s) {
+    var h = 0;
+    for (var i = 0; i < s.length; i++) {
+      h = ((h << 5) - h) + s.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h).toString(36);
+  }
+
+  function safeSetCache(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (err) {
+      // Quota exceeded: clean up older meting caches
+      try {
+        for (var i = localStorage.length - 1; i >= 0; i--) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf('meting_cache_') === 0) {
+            localStorage.removeItem(k);
+          }
+        }
+        localStorage.setItem(key, JSON.stringify(val));
+      } catch (e2) {}
+    }
+  }
 
   function loadMetingFast() {
     if (typeof window.APlayer === 'undefined') return;
@@ -453,18 +480,6 @@
       var id = el.dataset.id;
       if (!id) continue;
 
-      var cacheKey = METING_CACHE_PREFIX + server + '_' + type + '_' + id;
-      var cached = null;
-      try {
-        var item = localStorage.getItem(cacheKey);
-        if (item) {
-          var parsed = JSON.parse(item);
-          if (parsed && parsed.data && (Date.now() - (parsed.time || 0) < CACHE_EXPIRY_MS)) {
-            cached = parsed.data;
-          }
-        }
-      } catch (e) {}
-
       var defaultApi = 'https://api.injahow.cn/meting/?server=:server&type=:type&id=:id&r=:r';
       if (typeof window.meting_api !== 'undefined' && window.meting_api) {
         defaultApi = window.meting_api;
@@ -475,6 +490,22 @@
                      .replace(':id', id)
                      .replace(':auth', el.dataset.auth || '')
                      .replace(':r', '');
+
+      var useCache = el.dataset.cache !== 'false';
+      var cacheKey = METING_CACHE_PREFIX + server + '_' + type + '_' + id + '_' + hashStr(apiUrl);
+      var cached = null;
+
+      if (useCache) {
+        try {
+          var item = localStorage.getItem(cacheKey);
+          if (item) {
+            var parsed = JSON.parse(item);
+            if (parsed && parsed.data && (Date.now() - (parsed.time || 0) < CACHE_EXPIRY_MS)) {
+              cached = parsed.data;
+            }
+          }
+        } catch (e) {}
+      }
 
       var initPlayer = function(targetEl, audioList) {
         if (!audioList || !audioList.length || targetEl._metingLoaded) return;
@@ -512,7 +543,7 @@
       }
 
       // Background / Initial fetch
-      (function(targetEl, url, key) {
+      (function(targetEl, url, key, allowCache) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.onload = function() {
@@ -520,9 +551,9 @@
             try {
               var data = JSON.parse(xhr.responseText);
               if (Array.isArray(data) && data.length) {
-                try {
-                  localStorage.setItem(key, JSON.stringify({ time: Date.now(), data: data }));
-                } catch (e2) {}
+                if (allowCache) {
+                  safeSetCache(key, { time: Date.now(), data: data });
+                }
                 if (!targetEl._metingLoaded) {
                   initPlayer(targetEl, data);
                 }
@@ -531,7 +562,7 @@
           }
         };
         xhr.send();
-      })(el, apiUrl, cacheKey);
+      })(el, apiUrl, cacheKey, useCache);
     }
   }
 

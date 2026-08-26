@@ -25,14 +25,14 @@
   },
   "homepage": "https://github.com/Chengeeker/New-Aplayer#readme",
   "peerDependencies": {
-    "hexo": ">=4.0.0"
+    "hexo": ">=5.0.0"
   },
   "dependencies": {
     "aplayer": "^1.10.1",
     "babel-polyfill": "^6.26.0",
-    "hexo-fs": ">=0.2.0",
-    "hexo-log": ">=0.2.0",
-    "hexo-util": ">=0.1.7",
+    "hexo-fs": "^4.1.0",
+    "hexo-log": "^4.0.0",
+    "hexo-util": "^3.1.0",
     "meting": "^1.2.0"
   },
   "devDependencies": {

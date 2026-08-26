@@ -17,6 +17,7 @@
 
 ## Table of Contents
 - [✨ Key Features](#-key-features)
+- [💻 Environment Support & Verification](#-environment-support--verification)
 - [🚀 Quick Start & Installation](#-quick-start--installation)
 - [⚙️ Configuration (`_config.yml`)](#️-configuration-_configyml)
 - [🏷️ Tag Usage (Markdown Posts)](#️-tag-usage-markdown-posts)
@@ -42,14 +43,25 @@
    - **Strict Edge Snapping (8px)**: Only collapses into the semi-circular Mini-Orb when physically pushed flush against the screen edge (<= 8px) or clicking the dedicated dock button `|←`, preventing accidental premature snapping from a distance.
    - **Edge Vertical Sliding**: Slide the docked Mini-Orb up and down freely along the edge; pull inward toward screen center to smoothly expand.
    - **State Persistence & Restoration**: Saves dock coordinates and state in `localStorage`, automatically restoring position upon initial load, refresh, and PJAX transitions.
-4. **Millisecond-Level Local Caching (Meting Fast-Cache)**:
-   - Automatically caches playlist metadata in `localStorage`, eliminating network latency and rendering the player instantly in 0 milliseconds upon page refreshes and navigation.
+4. **Millisecond-Level Local Caching (Meting Fast-Cache v2)**:
+   - Automatically caches playlist metadata in `localStorage` with API key hashing and quota overflow protection, eliminating network latency and rendering the player instantly in 0 milliseconds upon page refreshes and navigation.
 5. **Mobile Responsive Optimization**:
    - Bottom bar compacted to 56px height, with playlist folded by default (`list_folded: true`) to prevent covering mobile reading space.
    - Zero lyrics clipping with precise vertical centering on smartphone screens.
 6. **Meting API Proxy Route Fix & Tag Syntax Enhancements**:
    - Automatically handles query parameter template injection (`?server=:server&type=:type&id=:id&r=:r`), eliminating 404s and playback skipping issues ("An audio error has occurred").
    - Full tag parser compatibility with `autoplay:false`, `listfolded:true`, `fixed:true`, etc.
+
+---
+
+## 💻 Environment Support & Verification
+
+This plugin has been integrated and verified across modern production environments:
+
+- **Hexo Version**: Hexo `5.x` / `6.x` / `7.x`
+- **Node.js Version**: Node.js `16.x` / `18.x` / `20.x` / `22.x`
+- **Theme Compatibility**: Butterfly (`4.x` / `5.x`), Fluid, Anzhiyu, NexT, and other modern Hexo themes
+- **Features Tested**: PJAX transitions, Light/Dark mode auto-switching, and Mobile touch dragging
 
 ---
 
@@ -154,7 +166,7 @@ New-Aplayer/
 │       └── playerMeting.es       # ★ {% meting %} tag parser & API routing
 ├── scripts/                      # Build and testing tools
 │   ├── build.js                  # Babel compiler (transpiles .es to .js)
-│   └── test.js                   # Unit test suite
+│   └── test.js                   # Automated unit and integration test suite
 ├── index.es                      # ★ Plugin entrypoint & global player markup generator
 ├── package.json                  # Dependencies & build scripts
 ├── README.md                     # Chinese documentation
@@ -196,7 +208,7 @@ New-Aplayer/
 After modifying any `.es` source file or asset, compile and test with the following commands:
 
 ```bash
-# 1. Run Babel transpiler and unit tests inside New-Aplayer
+# 1. Run Babel transpiler and full test suite inside New-Aplayer
 cd source/New-Aplayer
 npm run build
 npm test

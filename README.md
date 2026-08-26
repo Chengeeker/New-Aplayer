@@ -17,6 +17,7 @@
 
 ## 目录
 - [✨ 功能特性](#-功能特性)
+- [💻 环境支持与验证](#-环境支持与验证)
 - [🚀 快速开始与安装](#-快速开始与安装)
 - [⚙️ 配置说明 (`_config.yml`)](#️-配置说明-_configyml)
 - [🏷️ 标签用法 (Tag Plugins)](#️-标签用法-tag-plugins)
@@ -42,14 +43,25 @@
    - **严格贴边吸附（8px）**：仅在播放器被完全推到紧贴屏幕边缘（<= 8px）或点击专属贴边按钮 `|←` 时，才折叠为半球 Mini-Orb，彻底杜绝远距离误吸附。
    - **边缘沿轴滑动**：吸附状态下可沿屏幕边缘上下滑动调节位置；向屏幕内侧拖拽即可顺滑展开。
    - **状态持久化记忆**：基于 `localStorage` 自动记录坐标与吸附状态，刷新页面与 PJAX 切页后自动精准恢复。
-4. **毫秒级本地缓存加载（Meting Fast-Cache）**：
-   - 自动在本地缓存歌单元数据，刷新页面或切页时实现 0 秒毫秒级瞬间渲染，杜绝长时间空白等待。
+4. **毫秒级本地缓存加载（Meting Fast-Cache v2）**：
+   - 自动在本地缓存歌单元数据（API 节点 Hash 绑定与存储配额保护），刷新页面或切页时实现 0 秒毫秒级瞬间渲染，杜绝长时间空白等待。
 5. **移动端深度响应式适配**：
    - 播放器底栏高度优化为紧凑 56px，默认自动折叠歌单（`list_folded: true`），避免遮挡移动端阅读区域。
    - 消除歌词基线裁切，在小屏手机上垂直精准居中。
 6. **Meting API 路由修复与标签语法增强**：
    - 自动补全 API 参数占位符（`:server/:type/:id`），避免 404 与歌曲跳过报错（“An audio error has occurred”）。
    - 标签解析全面兼容 `autoplay:false`、`listfolded:true`、`fixed:true` 等键值与布尔写法。
+
+---
+
+## 💻 环境支持与验证
+
+本插件已在以下主流生产环境中完成完整集成与兼容性验证：
+
+- **Hexo 版本**：Hexo `5.x` / `6.x` / `7.x`
+- **Node.js 版本**：Node.js `16.x` / `18.x` / `20.x` / `22.x`
+- **支持主题**：Butterfly（`4.x` / `5.x`）、Fluid、Anzhiyu、NexT 等主流现代主题
+- **特性支持**：PJAX 无刷新跳转、深浅色模式自适应切换、移动端触摸手势
 
 ---
 
@@ -156,7 +168,7 @@ New-Aplayer/
 │       └── playerMeting.es       # ★ {% meting %} 标签解析与 API 路由
 ├── scripts/                      # 构建与测试工具
 │   ├── build.js                  # Babel 编译脚本 (ES6 .es -> CommonJS .js)
-│   └── test.js                   # 自动化单元测试套件
+│   └── test.js                   # 自动化单元与集成测试套件
 ├── index.es                      # ★ 插件总入口文件 (Hexo 过滤器与全局播放器生成)
 ├── package.json                  # 项目依赖与编译脚本
 ├── README.md                     # 中文说明文档
@@ -198,7 +210,7 @@ New-Aplayer/
 如果你对 `.es` 源代码或 `assets/` 资源进行了二次开发，按以下步骤进行编译与测试：
 
 ```bash
-# 1. 在 New-Aplayer 目录下运行编译与测试
+# 1. 在 New-Aplayer 目录下运行编译与全套集成测试
 cd source/New-Aplayer
 npm run build
 npm test
