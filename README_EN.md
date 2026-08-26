@@ -42,7 +42,7 @@
    - **Free 2D Dragging**: Drag the player card anywhere freely with automatic viewport boundary clamping.
    - **Hemisphere Mini-Orb Docking**: Drag near the left/right screen edge (< 70px) or click the dedicated dock button `|←` to collapse into an iOS semi-circular Mini-Orb with a 360° continuously rotating vinyl album disc.
    - **Edge Vertical Sliding**: Slide the docked Mini-Orb up and down freely along the edge; pull inward toward screen center to smoothly expand.
-   - **State Persistence**: Saves dock position and coordinates in `localStorage`, maintaining state across PJAX page transitions and reloads.
+   - **State Persistence & Restoration**: Saves dock position and coordinates in `localStorage`, automatically restoring the exact position upon page load, refresh, and PJAX transitions.
 4. **Mobile Responsive Optimization**:
    - Bottom bar compacted to 56px height, with playlist folded by default (`list_folded: true`) to prevent covering mobile reading space.
    - Zero lyrics clipping with precise vertical centering on smartphone screens.
@@ -53,22 +53,19 @@
 
 ## 🚀 Quick Start & Installation
 
-This project adopts a standardized Hexo local source module integration approach:
+This project adopts a standardized Hexo local source module integration approach. Pre-compiled CommonJS runtime files are included directly in the repository:
 
 ### Step 1: Clone source into your blog's `source` folder
 
-Run the following in your Hexo blog root:
+Run the following in your **Hexo blog root**:
 
 ```bash
 git clone https://github.com/Chengeeker/New-Aplayer.git source/New-Aplayer
-cd source/New-Aplayer
-npm install
-npm run build
 ```
 
-### Step 2: Configure Hexo Local Dependency
+### Step 2: Link Local Dependency in Root `package.json`
 
-Return to your Hexo blog root, edit the root `package.json`, and add the local file path dependency:
+Edit the root `package.json` of your **Hexo blog**, adding the local file dependency:
 
 ```json
 {
@@ -78,13 +75,13 @@ Return to your Hexo blog root, edit the root `package.json`, and add the local f
 }
 ```
 
-Then install the link in your Hexo blog root:
+Then install the dependency link from your **Hexo blog root**:
 
 ```bash
 npm install
 ```
 
-> **How it works**: Running `npm install` automatically creates a symlink in `node_modules/hexo-tag-aplayer` pointing to `source/New-Aplayer`. Hexo directly executes your local code, and any edits inside `source/New-Aplayer` take effect immediately upon running `npm run build`.
+> **Note**: Always run `npm install` from the **Hexo blog root**, rather than inside `source/New-Aplayer/`, to prevent Hexo from mistakenly scanning nested `node_modules` inside the source directory.
 
 ---
 
@@ -96,7 +93,7 @@ Add the following configuration to your Hexo root `_config.yml`:
 # APlayer & Meting Global Settings
 aplayer:
   meting: true                                  # Enable MetingJS for NetEase/QQ/Kugou music
-  meting_api: https://api.injahow.cn/meting/    # Meting API URL (auto template appended)
+  meting_api: https://api.injahow.cn/meting/    # Meting API URL (public demo endpoint)
   asset_inject: true                            # Auto inject liquid glass assets into pages
   global:
     enable: true                                # Enable global fixed bottom player
@@ -111,13 +108,16 @@ aplayer:
     list_folded: true                           # Fold playlist by default (recommended for mobile)
 ```
 
+> ⚠️ **Note on Meting API**:
+> `https://api.injahow.cn/meting/` is provided as a public demo endpoint. Public endpoints may be subject to network latency or rate limits. For production and long-term stability, **it is strongly recommended to self-host a Meting-API instance** (via Docker, Vercel, or personal server) and configure its URL in `meting_api`.
+
 ---
 
 ## 🏷️ Tag Usage (Markdown Posts)
 
 ### 1. Meting Playlist Tag
 ```markdown
-{% meting "13104322073" "netease" "playlist" "listfolded:true" %}
+{% meting "13104322073" "netease" "playlist" "listfolded:true" "autoplay:false" %}
 ```
 
 ### 2. Standard APlayer Song Tag
@@ -140,7 +140,7 @@ New-Aplayer/
 │   └── APlayer.dock.js           # ★ Dragging & edge docking engine (interaction logic)
 ├── common/                       # Shared constants and utility functions
 │   ├── constant.es               # Markers and constant definitions
-│   └── util.es                   # Option extractors and helper routines
+│   └── util.es                   # Option extractors, safe HTML escaping & helpers
 ├── lib/                          # Hexo backend rendering engine (ES6 source)
 │   ├── config.es                 # Config parser and asset generator registrar
 │   ├── view.es                   # View manipulator and DOM injector
@@ -150,8 +150,9 @@ New-Aplayer/
 │       ├── playerLyric.es        # Lyric tag parser
 │       ├── playerList.es         # Playlist tag parser
 │       └── playerMeting.es       # ★ {% meting %} tag parser & API routing
-├── scripts/                      # Build tools
-│   └── build.js                  # Babel compiler (transpiles .es to .js)
+├── scripts/                      # Build and testing tools
+│   ├── build.js                  # Babel compiler (transpiles .es to .js)
+│   └── test.js                   # Unit test suite
 ├── index.es                      # ★ Plugin entrypoint & global player markup generator
 ├── package.json                  # Dependencies & build scripts
 ├── README.md                     # Chinese documentation
@@ -165,13 +166,13 @@ New-Aplayer/
 1. **`assets/APlayer.glass.css`**:
    - Manages frosted glass visual styling, specular reflection borders, Mini-Orb docked hemisphere layout, lyrics HUD capsule, and responsive media queries.
 2. **`assets/APlayer.dock.js`**:
-   - Handles standard Pointer Events for PC & mobile touch, 2D free dragging, edge snapping calculations, edge vertical sliding, undocking transitions, and `localStorage` caching.
+   - Handles standard Pointer Events for PC & mobile touch, 2D free dragging, edge snapping calculations, edge vertical sliding, undocking transitions, and `localStorage` persistence.
 3. **`lib/config.es`**:
    - Parses site `_config.yml`, registers asset generation pipeline with Hexo so that files in `assets/` automatically deploy into `public/assets/`.
 4. **`index.es`**:
-   - Hooks into Hexo's `after_render:html` filter, injects global fixed player markup, CSS stylesheets, and JS script tags.
+   - Hooks into Hexo's `after_render:html` and `after_post_render` filters, injects global fixed player markup, CSS stylesheets, and JS script tags safely.
 5. **`lib/tag/playerMeting.es`**:
-   - Parses Markdown `{% meting %}` tags and formats API endpoint query templates.
+   - Parses Markdown `{% meting %}` tags, cleans parameters, and formats API endpoint query templates.
 
 ---
 
@@ -193,9 +194,10 @@ New-Aplayer/
 After modifying any `.es` source file or asset, compile and test with the following commands:
 
 ```bash
-# 1. Run Babel transpiler inside New-Aplayer
+# 1. Run Babel transpiler and unit tests inside New-Aplayer
 cd source/New-Aplayer
 npm run build
+npm test
 
 # 2. Clean and regenerate Hexo static files
 cd ../..
@@ -210,10 +212,10 @@ npx hexo server -p 4000
 ## ❓ FAQ
 
 #### Q1: Why does the console show "An audio error has occurred, player will skip forward..."?
-**A**: This occurs when third-party Meting APIs lack query templates or require VIP credentials. This plugin automatically appends `:server/:type/:id`, ensuring proper queries. Verify your `_config.yml` points to an active `meting_api` (e.g. `https://api.injahow.cn/meting/`).
+**A**: This occurs when third-party Meting APIs lack query templates or require VIP credentials. This plugin automatically appends `:server/:type/:id`, ensuring proper queries. Verify your `_config.yml` points to an active `meting_api`.
 
 #### Q2: Does the player remember its position on mobile after page transitions?
-**A**: Yes. Position coordinates and docking side are stored in `localStorage`, maintaining state across PJAX page loads and browser refreshes.
+**A**: Yes. Position coordinates and docking state are stored in `localStorage` and automatically restored upon initialization and PJAX page loads.
 
 #### Q3: Why didn't my edits in `lib/*.es` take effect?
 **A**: You must run `npm run build` in `source/New-Aplayer` to transpile ES6 `.es` files into CommonJS `.js` files before generating Hexo.

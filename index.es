@@ -10,7 +10,7 @@
 require('babel-polyfill')
 
 import * as fs from 'hexo-fs'
-import {throwError} from "./common/util"
+import {throwError, escapeHtml} from "./common/util"
 import * as util from 'hexo-util'
 import {
   APLAYER_SCRIPT_MARKER, APLAYER_TAG_MARKER, APLAYER_SECONDARY_SCRIPT_MARKER, APLAYER_DOCK_SCRIPT_MARKER,
@@ -59,8 +59,8 @@ config.get('assets').forEach(asset => {
 })
 
 const globalPlayer = config.get('global')
-const globalPlayerLiteral = globalPlayer
-  ? `<div class="aplayer no-destroy" data-id="${globalPlayer.id || ''}" data-server="${globalPlayer.server || ''}" data-type="${globalPlayer.type || 'playlist'}" data-fixed="${globalPlayer.fixed !== false}" data-autoplay="${globalPlayer.autoplay === true}" data-order="${globalPlayer.order || 'list'}" data-preload="${globalPlayer.preload || 'auto'}" data-mutex="${globalPlayer.mutex !== false}" data-listfolded="${globalPlayer.listfolded !== false && globalPlayer.list_folded !== false && globalPlayer.listFolded !== false}" data-theme="${globalPlayer.theme || 'var(--aplayer-theme, #6d8cff)'}"${globalPlayer.lrctype ? ` data-lrctype="${globalPlayer.lrctype}"` : ''}${globalPlayer.volume ? ` data-volume="${globalPlayer.volume}"` : ''}${globalPlayer.api ? ` data-api="${formatMetingApi(globalPlayer.api)}"` : ''}></div>`
+const globalPlayerLiteral = (globalPlayer && globalPlayer.enable !== false)
+  ? `<div class="aplayer no-destroy" data-id="${escapeHtml(globalPlayer.id || '')}" data-server="${escapeHtml(globalPlayer.server || '')}" data-type="${escapeHtml(globalPlayer.type || 'playlist')}" data-fixed="${globalPlayer.fixed !== false}" data-autoplay="${globalPlayer.autoplay === true}" data-order="${escapeHtml(globalPlayer.order || 'list')}" data-preload="${escapeHtml(globalPlayer.preload || 'auto')}" data-mutex="${globalPlayer.mutex !== false}" data-listfolded="${globalPlayer.listfolded !== false && globalPlayer.list_folded !== false && globalPlayer.listFolded !== false}" data-theme="${escapeHtml(globalPlayer.theme || 'var(--aplayer-theme, #6d8cff)')}"${globalPlayer.lrctype ? ` data-lrctype="${escapeHtml(globalPlayer.lrctype)}"` : ''}${globalPlayer.volume ? ` data-volume="${escapeHtml(globalPlayer.volume)}"` : ''}${globalPlayer.api ? ` data-api="${escapeHtml(formatMetingApi(globalPlayer.api))}"` : ''}></div>`
   : ''
 
 const hasPlayerMarkup = view => Boolean(globalPlayerLiteral) || view.hasTagMarker(APLAYER_TAG_MARKER) || view.hasTagMarker(METING_TAG_MARKER) || /<(?:meting-js|div)[^>]+(?:class=["'][^"']*aplayer|data-id=)/i.test(view.content)
@@ -108,8 +108,17 @@ hexo.extend.filter.register('after_render:html', function(raw, info) {
 hexo.extend.filter.register('after_post_render', (data) => {
   filterEmitted.after_post_render = true
   if (!config.get('asset_inject')) {
-    return
+    return data
   }
+  const hasTag = Boolean(globalPlayerLiteral) ||
+    data.content.includes(APLAYER_TAG_MARKER) ||
+    data.content.includes(METING_TAG_MARKER) ||
+    /<(?:meting-js|div)[^>]+(?:class=["'][^"']*aplayer|data-id=)/i.test(data.content)
+
+  if (!hasTag) {
+    return data
+  }
+
   // Polyfill: filter 'after_render:html' may not be fired in some cases, see https://github.com/hexojs/hexo-inject/issues/1
   if (config.get('meting')) {
     data.content = METING_SCRIPT_LITERAL + data.content

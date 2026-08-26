@@ -1,6 +1,6 @@
 import {BaseTag} from "./base"
 import {APLAYER_TAG_MARKER, PLAYER_TAG_OPTION} from "../../common/constant"
-import {throwError} from "../../common/util"
+import {throwError, extractOptionValue} from "../../common/util"
 
 export default class APlayerLyricTag extends BaseTag {
   constructor(hexo, args, pid, lyrics) {
@@ -13,16 +13,25 @@ export default class APlayerLyricTag extends BaseTag {
     let settings = Object.assign({}, PLAYER_TAG_OPTION);
     ([settings.title, settings.author, settings.url] = options)
     const optionalArgs = options.slice(3)
-    optionalArgs.forEach((value,index) => {
+    optionalArgs.forEach((value, index) => {
       switch(true) {
-        case value === 'narrow':
+        case value === 'narrow' || value === 'narrow:true':
           settings.narrow = true
           break
-        case value === 'autoplay':
+        case value === 'narrow:false':
+          settings.narrow = false
+          break
+        case value === 'autoplay' || value === 'autoplay:true':
           settings.autoplay = true
+          break
+        case value === 'autoplay:false':
+          settings.autoplay = false
           break
         case /^width:/.test(value):
           settings.width = value + ';'
+          break
+        case /^pic:/.test(value):
+          settings.pic = this.processUrl(extractOptionValue(value))
           break
         case index === 0:
           settings.pic = this.processUrl(value)
@@ -38,20 +47,20 @@ export default class APlayerLyricTag extends BaseTag {
   generate() {
     let {title, author, url, narrow, pic,
       autoplay, width} = this.settings
-    return  `<div id="${this.id}" class="aplayer ${APLAYER_TAG_MARKER}" style="margin-bottom: 20px;${width}">
+    return `<div id="${this.id}" class="aplayer ${APLAYER_TAG_MARKER}" style="margin-bottom: 20px;${width}">
 				<pre class="aplayer-lrc-content">${this.lyrics}</pre>
 			</div>
 			<script>
 				var ap = new APlayer({
-					element: document.getElementById("${this.id}"),
-					narrow: ${narrow},
-					autoplay: ${autoplay},
+					element: document.getElementById(${JSON.stringify(this.id)}),
+					narrow: ${Boolean(narrow)},
+					autoplay: ${Boolean(autoplay)},
 					showlrc: 2,
 					music: {
-						title: "${title}",
-						author: "${author}",
-						url: "${url}",
-						pic: "${pic}",
+						title: ${JSON.stringify(title || '')},
+						author: ${JSON.stringify(author || '')},
+						url: ${JSON.stringify(url || '')},
+						pic: ${JSON.stringify(pic || '')}
 					}
 				});
 				window.aplayers || (window.aplayers = []);

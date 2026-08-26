@@ -106,12 +106,44 @@
     getState: function() { return state; }
   };
 
+  function getAPlayerInstance(targetPlayer) {
+    var p = targetPlayer || getPlayer();
+    if (p && p._aplayer) return p._aplayer;
+    if (window.aplayers && window.aplayers.length > 0) {
+      if (p) {
+        for (var i = 0; i < window.aplayers.length; i++) {
+          var inst = window.aplayers[i];
+          if (inst && (inst.element === p || inst.container === p || (inst.element && p.contains(inst.element)))) {
+            return inst;
+          }
+        }
+      }
+      return window.aplayers[0];
+    }
+    return null;
+  }
+
   function initPlayerDock() {
     var player = getPlayer();
     if (!player) return;
 
-    if (player.dataset.dockInitialized === 'true') return;
+    if (player.dataset.dockInitialized === 'true') {
+      // Re-sync position on re-entry (e.g. PJAX)
+      if (state.isDocked) {
+        dockPlayer(state.dockSide, state.posY);
+      } else if (state.posX !== null && state.posY !== null) {
+        undockPlayer(state.posX, state.posY);
+      }
+      return;
+    }
     player.dataset.dockInitialized = 'true';
+
+    // Restore saved position/docked state from localStorage on startup
+    if (state.isDocked) {
+      dockPlayer(state.dockSide, state.posY);
+    } else if (state.posX !== null && state.posY !== null) {
+      undockPlayer(state.posX, state.posY);
+    }
 
     var body = player.querySelector('.aplayer-body');
     var lrc = document.querySelector('.aplayer.aplayer-fixed .aplayer-lrc');
@@ -119,8 +151,8 @@
 
     // Sync play/pause state classes
     function syncPlayingClass() {
-      if (window.aplayers && window.aplayers[0]) {
-        var ap = window.aplayers[0];
+      var ap = getAPlayerInstance(player);
+      if (ap) {
         if (!ap.paused) {
           player.classList.add('aplayer-playing');
         } else {
@@ -129,9 +161,10 @@
       }
     }
 
-    if (window.aplayers && window.aplayers[0]) {
-      window.aplayers[0].on('play', function() { player.classList.add('aplayer-playing'); });
-      window.aplayers[0].on('pause', function() { player.classList.remove('aplayer-playing'); });
+    var apInstance = getAPlayerInstance(player);
+    if (apInstance) {
+      apInstance.on('play', function() { player.classList.add('aplayer-playing'); });
+      apInstance.on('pause', function() { player.classList.remove('aplayer-playing'); });
       syncPlayingClass();
     }
 
@@ -163,23 +196,22 @@
     // Ensure clicking album pic anywhere reliably toggles playback
     if (pic) {
       pic.addEventListener('click', function(e) {
+        var ap = getAPlayerInstance(player);
         if (state.isDocked || player.classList.contains('aplayer-docked-left') || player.classList.contains('aplayer-docked-right')) {
           // If docked and user clicks pic, undock & resume playback
           e.stopPropagation();
           e.preventDefault();
           undockPlayer();
-          if (window.aplayers && window.aplayers[0]) {
-            if (window.aplayers[0].paused) {
-              window.aplayers[0].play();
-            }
+          if (ap && ap.paused) {
+            ap.play();
           }
           return;
         }
 
         // When expanded, if not directly clicking button element, trigger toggle
         if (!e.target.closest('.aplayer-button')) {
-          if (window.aplayers && window.aplayers[0]) {
-            window.aplayers[0].toggle();
+          if (ap) {
+            ap.toggle();
           }
         }
       });

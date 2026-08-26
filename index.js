@@ -88,7 +88,7 @@ config.get('assets').forEach(function (asset) {
 });
 
 var globalPlayer = config.get('global');
-var globalPlayerLiteral = globalPlayer ? '<div class="aplayer no-destroy" data-id="' + (globalPlayer.id || '') + '" data-server="' + (globalPlayer.server || '') + '" data-type="' + (globalPlayer.type || 'playlist') + '" data-fixed="' + (globalPlayer.fixed !== false) + '" data-autoplay="' + (globalPlayer.autoplay === true) + '" data-order="' + (globalPlayer.order || 'list') + '" data-preload="' + (globalPlayer.preload || 'auto') + '" data-mutex="' + (globalPlayer.mutex !== false) + '" data-listfolded="' + (globalPlayer.listfolded !== false && globalPlayer.list_folded !== false && globalPlayer.listFolded !== false) + '" data-theme="' + (globalPlayer.theme || 'var(--aplayer-theme, #6d8cff)') + '"' + (globalPlayer.lrctype ? ' data-lrctype="' + globalPlayer.lrctype + '"' : '') + (globalPlayer.volume ? ' data-volume="' + globalPlayer.volume + '"' : '') + (globalPlayer.api ? ' data-api="' + formatMetingApi(globalPlayer.api) + '"' : '') + '></div>' : '';
+var globalPlayerLiteral = globalPlayer && globalPlayer.enable !== false ? '<div class="aplayer no-destroy" data-id="' + (0, _util.escapeHtml)(globalPlayer.id || '') + '" data-server="' + (0, _util.escapeHtml)(globalPlayer.server || '') + '" data-type="' + (0, _util.escapeHtml)(globalPlayer.type || 'playlist') + '" data-fixed="' + (globalPlayer.fixed !== false) + '" data-autoplay="' + (globalPlayer.autoplay === true) + '" data-order="' + (0, _util.escapeHtml)(globalPlayer.order || 'list') + '" data-preload="' + (0, _util.escapeHtml)(globalPlayer.preload || 'auto') + '" data-mutex="' + (globalPlayer.mutex !== false) + '" data-listfolded="' + (globalPlayer.listfolded !== false && globalPlayer.list_folded !== false && globalPlayer.listFolded !== false) + '" data-theme="' + (0, _util.escapeHtml)(globalPlayer.theme || 'var(--aplayer-theme, #6d8cff)') + '"' + (globalPlayer.lrctype ? ' data-lrctype="' + (0, _util.escapeHtml)(globalPlayer.lrctype) + '"' : '') + (globalPlayer.volume ? ' data-volume="' + (0, _util.escapeHtml)(globalPlayer.volume) + '"' : '') + (globalPlayer.api ? ' data-api="' + (0, _util.escapeHtml)(formatMetingApi(globalPlayer.api)) + '"' : '') + '></div>' : '';
 
 var hasPlayerMarkup = function hasPlayerMarkup(view) {
   return Boolean(globalPlayerLiteral) || view.hasTagMarker(_constant.APLAYER_TAG_MARKER) || view.hasTagMarker(_constant.METING_TAG_MARKER) || /<(?:meting-js|div)[^>]+(?:class=["'][^"']*aplayer|data-id=)/i.test(view.content);
@@ -136,8 +136,14 @@ hexo.extend.filter.register('after_render:html', function (raw, info) {
 hexo.extend.filter.register('after_post_render', function (data) {
   filterEmitted.after_post_render = true;
   if (!config.get('asset_inject')) {
-    return;
+    return data;
   }
+  var hasTag = Boolean(globalPlayerLiteral) || data.content.includes(_constant.APLAYER_TAG_MARKER) || data.content.includes(_constant.METING_TAG_MARKER) || /<(?:meting-js|div)[^>]+(?:class=["'][^"']*aplayer|data-id=)/i.test(data.content);
+
+  if (!hasTag) {
+    return data;
+  }
+
   // Polyfill: filter 'after_render:html' may not be fired in some cases, see https://github.com/hexojs/hexo-inject/issues/1
   if (config.get('meting')) {
     data.content = METING_SCRIPT_LITERAL + data.content;

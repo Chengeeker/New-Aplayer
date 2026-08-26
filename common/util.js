@@ -29,3 +29,8 @@ var extractOptionValue = exports.extractOptionValue = function extractOptionValu
 var removeAll = exports.removeAll = function removeAll(target, find) {
   return target.replace(new RegExp(escapeRegExp(find), 'g'), '');
 };
+
+var escapeHtml = exports.escapeHtml = function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};

@@ -24,7 +24,7 @@
   - [项目目录结构](#项目目录结构)
   - [核心代码模块职责](#核心代码模块职责)
   - [修改指引：想改什么、改哪个文件](#修改指引想改什么改哪个文件)
-  - [构建与本地验证流程](#构建与本地验证流程)
+  - [构建与本地测试流程](#构建与本地测试流程)
 - [❓ 常见问题 (FAQ)](#-常见问题-faq)
 - [📄 开源协议](#-开源协议)
 
@@ -42,7 +42,7 @@
    - **自由 2D 拖拽**：按住播放器空白处可在屏幕任意位置随意拖拽放置，视口边界自动保护。
    - **贴边半球吸附**：靠近屏幕左/右边缘（< 70px）或点击专属贴边按钮 `|←` 时，自动折叠为 iOS 拟物半球 Mini-Orb，露出 360° 匀速旋转黑胶唱片盘与播放微光。
    - **边缘沿轴滑动**：吸附状态下可沿屏幕边缘上下自由滑动停驻；向屏幕内侧拉拽即可顺滑展开。
-   - **状态记忆**：基于 `localStorage` 自动记录吸附与停靠位置，页面跳转（PJAX）与刷新不丢失。
+   - **状态持久化恢复**：基于 `localStorage` 自动记录吸附与停靠位置，页面初次加载、跳转（PJAX）与刷新后自动精准恢复。
 4. **移动端深度响应式适配**：
    - 播放器底栏高度优化为紧凑 56px，默认自动折叠歌单（`list_folded: true`），彻底杜绝遮挡移动端内容。
    - 消除歌词基线裁切，在小屏手机上垂直精准居中。
@@ -53,22 +53,19 @@
 
 ## 🚀 快速开始与安装
 
-本项目采用标准的 Hexo 本地源码模块集成方案，步骤简单、可复制性强：
+本项目采用标准的 Hexo 本地源码模块集成方案，预编译好的 CommonJS 文件已直接包含在仓库中，开箱即用：
 
 ### 第一步：克隆源码至博客的 `source` 目录
 
-在你的 Hexo 博客根目录下执行：
+在你的 **Hexo 博客根目录** 下执行：
 
 ```bash
 git clone https://github.com/Chengeeker/New-Aplayer.git source/New-Aplayer
-cd source/New-Aplayer
-npm install
-npm run build
 ```
 
-### 第二步：配置 Hexo 本地依赖
+### 第二步：在博客根目录关联本地依赖
 
-返回 Hexo 博客根目录，编辑博客根目录的 `package.json`，在 `dependencies` 中添加本地文件依赖：
+在你的 **Hexo 博客根目录** 的 `package.json` 中配置本地依赖：
 
 ```json
 {
@@ -78,13 +75,13 @@ npm run build
 }
 ```
 
-然后在 Hexo 博客根目录下执行一次安装：
+然后在 **Hexo 博客根目录** 下执行一次安装：
 
 ```bash
 npm install
 ```
 
-> **原理解析**：执行 `npm install` 后，npm 会自动在博客的 `node_modules/` 中建立一个指向 `source/New-Aplayer` 的符号链接（Symlink）。这样 Hexo 在启动时便会直接执行本地源码，后续你对 `source/New-Aplayer` 的所有修改，在运行 `npm run build` 后都会立即生效。
+> **安全提示**：请在 **Hexo 博客根目录** 下执行 `npm install`，避免在 `source/New-Aplayer/` 内部直接生成额外的 `node_modules`，以防止 Hexo 错误扫描其内部依赖。仓库已预置编译好的运行时代码，开箱即用。
 
 ---
 
@@ -96,7 +93,7 @@ npm install
 # APlayer & Meting 全局配置
 aplayer:
   meting: true                                  # 启用 MetingJS 网易云/QQ音乐等平台歌单解析
-  meting_api: https://api.injahow.cn/meting/    # Meting API 地址（插件会自动补全参数模板）
+  meting_api: https://api.injahow.cn/meting/    # Meting API 节点（此处为公共测试接口，生产建议自建）
   asset_inject: true                            # 自动将毛玻璃样式与拖拽引擎注入全站页面
   global:
     enable: true                                # 开启全站固定底栏吸底播放器
@@ -111,15 +108,18 @@ aplayer:
     list_folded: true                           # 默认折叠歌单列表（推荐 true，防止移动端遮挡）
 ```
 
+> ⚠️ **关于 Meting API 的说明**：
+> `https://api.injahow.cn/meting/` 仅为公共演示接口，公共接口可能会受到网络波动或服务变动影响。对于长期稳定使用的博客，**强烈建议自行部署 Meting-API 服务**（基于 Vercel、Docker 或自建服务器），并将地址填入 `meting_api`。
+
 ---
 
 ## 🏷️ 标签用法 (Tag Plugins)
 
-除了全局吸底播放器，你还可以在任意 Markdown 文章中使用标签插入播放器：
+除了全局吸底播放器，你还可以在任意 Markdown 文章中使用标签插入独立播放器：
 
 ### 1. Meting 平台歌单标签
 ```markdown
-{% meting "13104322073" "netease" "playlist" "listfolded:true" %}
+{% meting "13104322073" "netease" "playlist" "listfolded:true" "autoplay:false" %}
 ```
 
 ### 2. 标准 APlayer 单曲标签
@@ -131,7 +131,7 @@ aplayer:
 
 ## 🛠️ 二次开发与 Fork 定制指南
 
-本项目为标准 ES6 + Babel + Hexo Generator 架构，代码结构清晰，任何人 Fork 之后都可以轻松上手进行二次定制。
+本项目采用标准的 ES6 + Babel + Hexo Generator 架构，代码结构清晰，任何人 Fork 之后都可以轻松上手进行二次定制。
 
 ### 项目目录结构
 
@@ -142,7 +142,7 @@ New-Aplayer/
 │   └── APlayer.dock.js           # ★ 拖拽与贴边吸附引擎（交互定制）
 ├── common/                       # 公共常量与工具函数
 │   ├── constant.es               # 常量定义与资源标记 Marker
-│   └── util.es                   # 选项提取与工具函数
+│   └── util.es                   # 选项提取、安全转义与工具函数
 ├── lib/                          # 后端渲染引擎（Babel ES6 源码）
 │   ├── config.es                 # Hexo 配置解析与静态资源注册器
 │   ├── view.es                   # HTML 视图资源注入与 DOM 操作
@@ -152,8 +152,9 @@ New-Aplayer/
 │       ├── playerLyric.es        # 歌词标签渲染
 │       ├── playerList.es         # 播放列表标签渲染
 │       └── playerMeting.es       # ★ {% meting %} 标签解析与 API 路由
-├── scripts/                      # 构建工具
-│   └── build.js                  # Babel 编译脚本 (ES6 .es -> CommonJS .js)
+├── scripts/                      # 构建与测试工具
+│   ├── build.js                  # Babel 编译脚本 (ES6 .es -> CommonJS .js)
+│   └── test.js                   # 自动化单元测试套件
 ├── index.es                      # ★ 插件总入口文件 (Hexo 过滤器与全局播放器生成)
 ├── package.json                  # 项目依赖与编译脚本
 ├── README.md                     # 中文说明文档
@@ -167,13 +168,13 @@ New-Aplayer/
 1. **`assets/APlayer.glass.css`**：
    - 负责播放器底栏、吸附半球 Mini-Orb、悬浮歌词胶囊 HUD、播放列表卡片的 iOS 毛玻璃拟物风格、阴影、微光边框及媒体查询。
 2. **`assets/APlayer.dock.js`**：
-   - 负责 PC 鼠标与手机触屏手势捕获、2D 自由拖拽、屏幕边缘吸附计算、Y 轴沿边缘滑动、点击展开/暂停事件调度与 `localStorage` 记忆。
+   - 负责 PC 鼠标与手机触屏手势捕获、2D 自由拖拽、屏幕边缘吸附计算、Y 轴沿边缘滑动、点击展开/暂停事件调度与 `localStorage` 持久化恢复。
 3. **`lib/config.es`**：
    - 负责读取站点 `_config.yml` 中的 `aplayer` 配置项，向 Hexo 注册静态资产生成管道（使得 `assets/` 下的 CSS/JS 自动生成到博客的 `public/assets/` 目录中）。
 4. **`index.es`**：
    - 插件主入口，负责在页面 HTML 渲染阶段（`after_render:html`）注入全局固定播放器 DOM、样式链接及脚本。
 5. **`lib/tag/playerMeting.es`**：
-   - 负责解析文章中的 `{% meting %}` 标签，格式化 API 模板，避免跨域或 404。
+   - 负责解析文章中的 `{% meting %}` 标签，格式化 API 模板与参数清洗，避免跨域或 404。
 
 ---
 
@@ -190,14 +191,15 @@ New-Aplayer/
 
 ---
 
-### 构建与本地验证流程
+### 构建与本地测试流程
 
-每次修改了 `.es` 源代码或 `assets/` 资源后，按以下三步完成构建：
+如果你对 `.es` 源代码或 `assets/` 资源进行了二次开发，按以下步骤进行编译与测试：
 
 ```bash
-# 1. 在 New-Aplayer 目录下运行 Babel 编译（生成 index.js 及 lib/*.js）
+# 1. 在 New-Aplayer 目录下运行编译与测试
 cd source/New-Aplayer
 npm run build
+npm test
 
 # 2. 返回 Hexo 博客根目录，清理并重新生成静态文件
 cd ../..
@@ -207,17 +209,15 @@ npx hexo clean && npx hexo generate
 npx hexo server -p 4000
 ```
 
-打开浏览器访问 `http://localhost:4000` 即可实时查看最新效果。
-
 ---
 
 ## ❓ 常见问题 (FAQ)
 
 #### Q1: 为什么控制台提示 "An audio error has occurred, player will skip forward..."？
-**A**: 这是由于部分三方 Meting API 未正确配置路由模板或歌曲需要平台会员权限。本项目已内置参数模板补全（`:server/:type/:id`），请确保 `_config.yml` 中配置了可用的 `meting_api` 地址（如 `https://api.injahow.cn/meting/`）。
+**A**: 这是由于部分三方 Meting API 未正确配置路由模板或歌曲需要平台会员权限。本项目已内置参数模板补全（`:server/:type/:id`），请确保 `_config.yml` 中配置了可用的 `meting_api` 地址。
 
-#### Q2: 手机端切换页面后播放器位置会重置吗？
-**A**: 不会。播放器与贴边半球的坐标已自动存入浏览器的 `localStorage`，PJAX 无刷新换页和全页面重载均会保持当前位置。
+#### Q2: 手机端切换页面或刷新后播放器位置会保持吗？
+**A**: 会。播放器与贴边半球的坐标及吸附状态均已自动持久化存入浏览器的 `localStorage`，初次进入页面或通过 PJAX 无刷新切页均会自动恢复保存的位置。
 
 #### Q3: 为什么修改了 `lib/*.es` 代码后 Hexo 博客没有生效？
 **A**: 必须在 `source/New-Aplayer` 目录下运行 `npm run build`，将 ES6 源码编译为 Node.js 可执行的 CommonJS 文件（`.js`），然后重新运行 `hexo clean && hexo generate`。
