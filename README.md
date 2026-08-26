@@ -1,4 +1,4 @@
-# New-Aplayer (毛玻璃与贴边拖拽增强版)
+# New-Aplayer
 
 <div align="center">
 
