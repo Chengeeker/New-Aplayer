@@ -1,4 +1,4 @@
-# New-Aplayer
+# New-Aplayer (Frosted Glass & Docking Edition)
 
 <div align="center">
 
@@ -20,6 +20,7 @@
 - [💻 Environment Support & Verification](#-environment-support--verification)
 - [🚀 Quick Start & Installation](#-quick-start--installation)
 - [⚙️ Configuration (`_config.yml`)](#️-configuration-_configyml)
+- [⚠️ Key Pitfalls & Troubleshooting Checklist](#️-key-pitfalls--troubleshooting-checklist)
 - [🏷️ Tag Usage (Markdown Posts)](#️-tag-usage-markdown-posts)
 - [🛠️ Developer & Fork Guide](#️-developer--fork-guide)
   - [Directory Architecture](#directory-architecture)
@@ -58,7 +59,7 @@
 
 This plugin has been integrated and verified across modern production environments:
 
-- **Hexo Version**: Hexo `5.x` / `6.x` / `7.x`
+- **Hexo Version**: Hexo `5.x` / `6.x` / `7.x` / `8.x`
 - **Node.js Version**: Node.js `16.x` / `18.x` / `20.x` / `22.x`
 - **Theme Compatibility**: Butterfly (`4.x` / `5.x`), Fluid, Anzhiyu, NexT, and other modern Hexo themes
 - **Features Tested**: PJAX transitions, Light/Dark mode auto-switching, and Mobile touch dragging
@@ -95,7 +96,7 @@ Then install the dependency link from your **Hexo blog root**:
 npm install --legacy-peer-deps
 ```
 
-> **Note**:
+> **Important Notes**:
 > 1. Always run `npm install` from the **Hexo blog root**, rather than inside `source/New-Aplayer/`, to prevent Hexo from mistakenly scanning nested `node_modules` inside the source directory.
 > 2. Using `--legacy-peer-deps` avoids `ERESOLVE` errors when your Hexo blog contains older legacy plugins.
 
@@ -103,17 +104,17 @@ npm install --legacy-peer-deps
 
 ## ⚙️ Configuration (`_config.yml`)
 
-Add the following configuration to your Hexo root `_config.yml`:
+Add the following configuration to your Hexo site root **`_config.yml`** (note: site config, not theme config):
 
 ```yaml
 # APlayer & Meting Global Settings
 aplayer:
-  meting: true                                  # Enable MetingJS for NetEase/QQ/Kugou music
+  meting: true                                  # Required: enable MetingJS for NetEase/QQ/Kugou music
+  asset_inject: true                            # Required: auto inject assets into pages (if false, player will NOT display)
   meting_api: https://api.injahow.cn/meting/    # Meting API URL (public demo endpoint)
-  asset_inject: true                            # Auto inject frosted glass assets into pages
   global:
     enable: true                                # Enable global fixed bottom player
-    id: 13104322073                             # Playlist / Song ID
+    id: 13104322073                             # Playlist / Song ID (replace with your own playlist ID)
     server: netease                             # Music server: netease / tencent / kugou
     type: playlist                              # Type: playlist / song / artist
     fixed: true                                 # Fixed to bottom of screen
@@ -126,6 +127,21 @@ aplayer:
 
 > ⚠️ **Note on Meting API**:
 > `https://api.injahow.cn/meting/` is provided as a public demo endpoint. Public endpoints may be subject to network latency or rate limits. For production and long-term stability, **it is recommended to self-host a Meting-API instance** (via Docker, Vercel, or personal server) and configure its URL in `meting_api`.
+
+---
+
+## ⚠️ Key Pitfalls & Troubleshooting Checklist
+
+If the player does not appear after setup, verify the following checklist:
+
+1. **`asset_inject` must be set to `true`**:
+   - If `asset_inject: false` is configured, Hexo skips all CSS/JS stylesheet and player DOM injection completely.
+2. **`global:` configuration block is required for full-site bottom player**:
+   - Without the `global:` section (containing `id`, `server`, `type`), Hexo cannot determine which playlist to mount.
+3. **Disable Theme Built-in APlayer (avoid conflicts)**:
+   - If your theme (such as Butterfly's `_config.butterfly.yml` or Fluid's config) has an `aplayer: enable: true` setting, **turn it off (set to `false`)**. This plugin handles global asset injection automatically; disabling the theme option prevents duplicate scripts and styling clashes.
+4. **Always clean and regenerate after editing configs**:
+   - Run `npx hexo clean && npx hexo generate` in your blog root whenever you update `_config.yml`.
 
 ---
 
