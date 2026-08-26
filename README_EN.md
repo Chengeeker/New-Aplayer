@@ -53,19 +53,23 @@
 
 ## 🚀 Quick Start & Installation
 
-### Option 1: Local Module in Hexo `source/` (Recommended)
+This project adopts a standardized Hexo local source module integration approach:
 
-Clone directly into your blog's `source/New-Aplayer` directory:
+### Step 1: Clone source into your blog's `source` folder
+
+Run the following in your Hexo blog root:
 
 ```bash
-cd "your-hexo-blog"
 git clone https://github.com/Chengeeker/New-Aplayer.git source/New-Aplayer
 cd source/New-Aplayer
 npm install
 npm run build
 ```
 
-Then add the local file dependency in your root `package.json`:
+### Step 2: Configure Hexo Local Dependency
+
+Return to your Hexo blog root, edit the root `package.json`, and add the local file path dependency:
+
 ```json
 {
   "dependencies": {
@@ -74,16 +78,13 @@ Then add the local file dependency in your root `package.json`:
 }
 ```
 
-### Option 2: Replace NPM Package in `node_modules`
+Then install the link in your Hexo blog root:
 
 ```bash
-cd "your-hexo-blog"
-rm -rf node_modules/hexo-tag-aplayer
-git clone https://github.com/Chengeeker/New-Aplayer.git node_modules/hexo-tag-aplayer
-cd node_modules/hexo-tag-aplayer
 npm install
-npm run build
 ```
+
+> **How it works**: Running `npm install` automatically creates a symlink in `node_modules/hexo-tag-aplayer` pointing to `source/New-Aplayer`. Hexo directly executes your local code, and any edits inside `source/New-Aplayer` take effect immediately upon running `npm run build`.
 
 ---
 

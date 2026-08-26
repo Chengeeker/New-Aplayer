@@ -9,7 +9,7 @@
 
 **专为 Hexo 博客深度定制的 iOS Liquid Glass 拟物毛玻璃音乐播放器插件**
 
-[English Documentation](./README_EN.md) · [中文文档](./README.md) · [实测效果报告](../../walkthrough.md)
+[English Documentation](./README_EN.md) · [中文文档](./README.md)
 
 </div>
 
@@ -17,7 +17,6 @@
 
 ## 目录
 - [✨ 功能特性](#-功能特性)
-- [📸 视觉效果展示](#-视觉效果展示)
 - [🚀 快速开始与安装](#-快速开始与安装)
 - [⚙️ 配置说明 (`_config.yml`)](#️-配置说明-_configyml)
 - [🏷️ 标签用法 (Tag Plugins)](#️-标签用法-tag-plugins)
@@ -52,31 +51,25 @@
 
 ---
 
-## 📸 视觉效果展示
-
-| 场景 | 效果截图 | 交互说明 |
-| :--- | :--- | :--- |
-| **桌面端折叠播放** | ![桌面端折叠播放](https://raw.githubusercontent.com/username/repo/master/docs/demo_desktop.png) | 默认折叠歌单，悬浮歌词胶囊居中呈现，控制栏新增 `|←` 一键吸附按钮。 |
-| **左/右边缘吸附 Mini-Orb** | ![边缘吸附](https://raw.githubusercontent.com/username/repo/master/docs/demo_dock.png) | 自动吸附为纯净半球黑胶唱片，可沿边缘上下滑动，点击即弹性回弹展开。 |
-| **手机端适配 (390px)** | ![手机端适配](https://raw.githubusercontent.com/username/repo/master/docs/demo_mobile.png) | 56px 紧凑底栏，歌词居中零裁切，不遮挡主体内容。 |
-
----
-
 ## 🚀 快速开始与安装
 
-### 方式一：直接作为 Hexo 源码模块引入（推荐）
+本项目采用标准的 Hexo 本地源码模块集成方案，步骤简单、可复制性强：
 
-直接将本项目克隆到 Hexo 博客的 `source/New-Aplayer` 目录下：
+### 第一步：克隆源码至博客的 `source` 目录
+
+在你的 Hexo 博客根目录下执行：
 
 ```bash
-cd "your-hexo-blog"
 git clone https://github.com/Chengeeker/New-Aplayer.git source/New-Aplayer
 cd source/New-Aplayer
 npm install
 npm run build
 ```
 
-并在 Hexo 根目录的 `package.json` 中配置依赖指向：
+### 第二步：配置 Hexo 本地依赖
+
+返回 Hexo 博客根目录，编辑博客根目录的 `package.json`，在 `dependencies` 中添加本地文件依赖：
+
 ```json
 {
   "dependencies": {
@@ -85,16 +78,13 @@ npm run build
 }
 ```
 
-### 方式二：直接克隆至 `node_modules` 替换原生插件
+然后在 Hexo 博客根目录下执行一次安装：
 
 ```bash
-cd "your-hexo-blog"
-rm -rf node_modules/hexo-tag-aplayer
-git clone https://github.com/Chengeeker/New-Aplayer.git node_modules/hexo-tag-aplayer
-cd node_modules/hexo-tag-aplayer
 npm install
-npm run build
 ```
+
+> **原理解析**：执行 `npm install` 后，npm 会自动在博客的 `node_modules/` 中建立一个指向 `source/New-Aplayer` 的符号链接（Symlink）。这样 Hexo 在启动时便会直接执行本地源码，后续你对 `source/New-Aplayer` 的所有修改，在运行 `npm run build` 后都会立即生效。
 
 ---
 
